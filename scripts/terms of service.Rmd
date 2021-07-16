@@ -1,0 +1,52 @@
+---
+title: "Terms of Service"
+author: "Connor Krenzer"
+date: "7/15/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+# Introduction
+
+Add writing here.
+
+```{r setup-packages, include = FALSE}
+
+knitr::opts_chunk$set(echo = FALSE,
+                      include = FALSE,
+                      results = "show",
+                      error = F,
+                      warning = F,
+                      message = F)
+
+
+# PACKAGES
+if(!require(pacman)) install.packages("pacman")
+
+# Data Import Packages
+pacman::p_load(readtext)
+
+# General Packages
+pacman::p_load(stringr, dplyr)
+
+# Text Mining Packages
+pacman::p_load(tidytext, textdata)
+
+# Setting ggplot to the dark theme
+ggplot2::theme_set(theme_dark())
+
+
+
+# DATA IMPORT
+tos <- readtext(file = "data/") %>% 
+  rename(company = doc_id) %>% 
+  mutate(company = str_remove_all(company, "_Terms_of_Service.txt"))
+
+```
+
+
+
+
+
+
