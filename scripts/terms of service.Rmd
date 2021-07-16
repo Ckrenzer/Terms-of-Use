@@ -28,20 +28,50 @@ if(!require(pacman)) install.packages("pacman")
 pacman::p_load(readtext)
 
 # General Packages
-pacman::p_load(stringr, dplyr)
+pacman::p_load(stringr, dplyr, ggplot2)
 
 # Text Mining Packages
 pacman::p_load(tidytext, textdata)
 
 # Setting ggplot to the dark theme
 ggplot2::theme_set(theme_dark())
+# The colors that represent each company
+company_colors <- c(amazon = "#FF9900",
+                    duckduckgo = "#ec2127",
+                    facebook = "#4267B2",
+                    github = "#000000",
+                    linkedin = "#007bb6",
+                    spotify = "#1DB954",
+                    youtube = "#FF0000")
 
 
 
 # DATA IMPORT
 tos <- readtext(file = "data/") %>% 
   rename(company = doc_id) %>% 
-  mutate(company = str_remove_all(company, "_Terms_of_Service.txt"))
+  mutate(company = str_remove_all(company, "_Terms_of_Service.txt"),
+         text = str_to_lower(text))
+
+
+```
+
+
+
+```{r number of characters}
+
+tos %>% 
+  mutate(number_of_characters_in_TOS = str_length(text)) %>% 
+  arrange(desc(number_of_characters_in_TOS)) %>% 
+  ggplot() +
+  geom_col(mapping = aes(x = reorder(company,
+                                     desc(number_of_characters_in_TOS)),
+                         y = number_of_characters_in_TOS,
+                         fill = company),
+           show.legend = FALSE) +
+  scale_fill_manual(values = company_colors) +
+  ggtitle("Number of Characters Used in Terms of Service") +
+  xlab("Company") +
+  ylab("Number of Characters")
 
 ```
 
@@ -49,4 +79,13 @@ tos <- readtext(file = "data/") %>%
 
 
 
+```{r unigrams}
+
+unigrams <- tos %>% 
+  unnest_tokens(word, text)
+
+ungrouped_unigram_counts <- count(unigrams, word, sort = FALSE)
+unigram_counts <- count(unigrams, company, word, sort = FALSE)
+
+```
 
