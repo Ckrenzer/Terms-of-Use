@@ -16,9 +16,9 @@ Add writing here.
 knitr::opts_chunk$set(echo = FALSE,
                       include = FALSE,
                       results = "show",
-                      error = F,
-                      warning = F,
-                      message = F)
+                      error = FALSE,
+                      warning = FALSE,
+                      message = FALSE)
 
 
 # PACKAGES
@@ -36,13 +36,13 @@ pacman::p_load(tidytext, textdata)
 # Setting ggplot to the dark theme
 ggplot2::theme_set(theme_dark())
 # The colors that represent each company
-company_colors <- c(amazon = "#FF9900",
-                    duckduckgo = "#ec2127",
-                    facebook = "#4267B2",
-                    github = "#000000",
-                    linkedin = "#007bb6",
-                    spotify = "#1DB954",
-                    youtube = "#FF0000")
+company_colors <- c(Amazon = "#FF9900",
+                    DuckDuckGo = "#ec2127",
+                    Facebook = "#4267B2",
+                    GitHub = "#000000",
+                    LinkedIn = "#007bb6",
+                    Spotify = "#1DB954",
+                    YouTube = "#FF0000")
 
 
 
@@ -64,14 +64,15 @@ tos %>%
   arrange(desc(number_of_characters_in_TOS)) %>% 
   ggplot() +
   geom_col(mapping = aes(x = reorder(company,
-                                     desc(number_of_characters_in_TOS)),
+                                     number_of_characters_in_TOS),
                          y = number_of_characters_in_TOS,
                          fill = company),
            show.legend = FALSE) +
-  scale_fill_manual(values = company_colors) +
   ggtitle("Number of Characters Used in Terms of Service") +
   xlab("Company") +
-  ylab("Number of Characters")
+  ylab("Number of Characters") +
+  scale_fill_manual(values = company_colors) +
+  coord_flip()
 
 ```
 
@@ -88,4 +89,24 @@ ungrouped_unigram_counts <- count(unigrams, word, sort = FALSE)
 unigram_counts <- count(unigrams, company, word, sort = FALSE)
 
 ```
+
+
+
+
+
+
+
+
+```{r common words}
+
+unigrams %>% 
+  filter(!word %in% stop_words$word) %>% 
+  count(word) %>% 
+  slice_max(order_by = n, n = 25) %>% 
+  ggplot() +
+  geom_col(mapping = aes(x = word, y = n))
+
+
+```
+
 

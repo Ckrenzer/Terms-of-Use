@@ -119,10 +119,10 @@ duckduckgo_tos <- read_html(url) %>%
 
 # Saving Results ---------------------------------------------------------
 # The results will be stored in .txt files
-write_lines(x = linkedin_tos, file = "data/linkedin_Terms_of_Service.txt", append = FALSE)
-write_lines(x = facebook_tos, file = "data/facebook_Terms_of_Service.txt", append = FALSE)
-write_lines(x = youtube_tos, file = "data/youtube_Terms_of_Service.txt", append = FALSE)
-write_lines(x = amazon_tos, file = "data/amazon_Terms_of_Service.txt", append = FALSE)
-write_lines(x = spotify_tos, file = "data/spotify_Terms_of_Service.txt", append = FALSE)
-write_lines(x = github_tos, file = "data/github_Terms_of_Service.txt", append = FALSE)
-write_lines(x = duckduckgo_tos, file = "data/duckduckgo_Terms_of_Service.txt", append = FALSE)
+write_lines(x = linkedin_tos, file = "data/LinkedIn_Terms_of_Service.txt", append = FALSE)
+write_lines(x = facebook_tos, file = "data/Facebook_Terms_of_Service.txt", append = FALSE)
+write_lines(x = youtube_tos, file = "data/YouTube_Terms_of_Service.txt", append = FALSE)
+write_lines(x = amazon_tos, file = "data/Amazon_Terms_of_Service.txt", append = FALSE)
+write_lines(x = spotify_tos, file = "data/Spotify_Terms_of_Service.txt", append = FALSE)
+write_lines(x = github_tos, file = "data/GitHub_Terms_of_Service.txt", append = FALSE)
+write_lines(x = duckduckgo_tos, file = "data/DuckDuckGo_Terms_of_Service.txt", append = FALSE)
