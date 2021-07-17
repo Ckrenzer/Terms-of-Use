@@ -95,48 +95,32 @@ unigram_counts <- count(unigrams, company, word, sort = FALSE)
 
 ```{r my Porter stemmer}
 
-my_porter_stemmer <- function(unigram_vector){
+my_porter_stemmer <- function(unigram_df){
   # The implementation of the Porter stemmer algorithm as I understand it,
   # described in Julia Silge's book:
   # https://smltar.com/stemming.html#understand-a-stemming-algorithm
+  # or more formally from:
+  # https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/
   
+  unigram_df <- unigram_df %>% 
+    mutate(m = str_count(word, pattern = "[aeiou]+[^aeiou]+"),
+           word = str_replace_all(word, "sses", "ss") %>% 
+             str_replace_all("ies", "i") %>% 
+             str_replace("([a-rt-z])(?<!s)s$", "\\1") %>% #remove final single 's' letters
+             str_replace_all()
+           
+    )#end of mutate() call
   
-
-  
-  stemmed_vector <- str_replace_all(unigram_vector, "sses", "ss") %>% 
-    str_replace_all("ies", "i") %>% 
-    str_replace("([a-rt-z])(?<!s)s$", "\\1") %>% #remove final single 's' letters
-    str_replace_all()
-    
   
   
   
   
   
 }
-
 
 # CALCULATING MEASURE
-
-vowels <- c("a", "e", "i", "o", "u")
-
-first_letter <- str_sub("Connor", end = 1)
-last_letter <- str_sub("Connor", start = -1)
-
-
-if(!first_letter %in% vowels && !last_letter %in% vowels){
-  # starts and ends with consonants  
-} else if(!first_letter %in% vowels && last_letter %in% vowels) {
-  # starts with consonant, ends with vowel
-} else if(first_letter %in% vowels && !last_letter %in% vowels) {
-  # starts with a vowel, ends with a consonant
-} else {
-  # starts and ends with a vowel
-}
-
-
-str_count(c("Connor", "tree", "algorithms"), pattern = "[^aeiou]+[aeiou]+|[aeiou]+[^aeiou]+")
-str_view_all(c("Connor", "tree", "algorithms"), pattern = "[^aeiou]+[aeiou]+|[aeiou]+[^aeiou]+")
+words <- c("tree", "trouble", "troubles", "collection", "management", "conclude", "revise", "oaten")
+measure <- str_count(words, pattern = "[aeiou]+[^aeiou]+")
 
 
 ```
