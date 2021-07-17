@@ -69,12 +69,17 @@ tos %>%
                          fill = company),
            show.legend = FALSE) +
   ggtitle("Number of Characters Used in Terms of Service") +
-  xlab("Company") +
+  xlab(NULL) +
   ylab("Number of Characters") +
   scale_fill_manual(values = company_colors) +
   coord_flip()
 
 ```
+
+
+Does this mean that refusing to track user data equates to needing fewer lawyers? I am inclined to think so, but the above graph is incapable of confirming this suspicion because of differences intrinsic in the services these companies provide. Further, Amazon--the largest company in the bunch--has a shorter terms of use page than its contemporaries. One explanation is that these companies spread a bunch of legal information off into different sections of its website to organize their policies into logical chunks.
+
+
 
 
 
@@ -169,20 +174,58 @@ my_porter_stemmer <- function(unigram_df){
       m > 0 && str_detect(word, "ness$") ~ str_remove(string = word, pattern = "ness$"),
       
       TRUE ~ word
-      ))
- 
+    ))
+  
   
   
   # Step 4
   unigram_df <- unigram_df %>% 
     mutate(word = case_when(
-      m > 0 && str_detect(word, "$") ~ str_replace(string = word, pattern = "$", replacement = ""),
+      m > 1 && str_detect(word, "al$") ~ str_remove(string = word, pattern = "al$"),
+      m > 1 && str_detect(word, "ance$") ~ str_remove(string = word, pattern = "ance$"),
+      m > 1 && str_detect(word, "ence$") ~ str_remove(string = word, pattern = "ence$"),
+      m > 1 && str_detect(word, "er$") ~ str_remove(string = word, pattern = "er$"),
+      m > 1 && str_detect(word, "ic$") ~ str_remove(string = word, pattern = "ic$"),
+      m > 1 && str_detect(word, "able$") ~ str_remove(string = word, pattern = "able$"),           
+      m > 1 && str_detect(word, "ible$") ~ str_remove(string = word, pattern = "ible$"),           
+      m > 1 && str_detect(word, "ant$") ~ str_remove(string = word, pattern = "ant$"),           
+      m > 1 && str_detect(word, "ement$") ~ str_remove(string = word, pattern = "ement$"),           
+      m > 1 && str_detect(word, "ment$") ~ str_remove(string = word, pattern = "ment$"), 
+      m > 1 && str_detect(word, "tion$|sion$") ~ str_remove(string = word, pattern = "tion$|sion$"),           
+      m > 1 && str_detect(word, "ou$") ~ str_remove(string = word, pattern = "ou$"),           
+      m > 1 && str_detect(word, "ism$") ~ str_remove(string = word, pattern = "ism$"),           
+      m > 1 && str_detect(word, "ate$") ~ str_remove(string = word, pattern = "ate$"),           
+      m > 1 && str_detect(word, "iti$") ~ str_remove(string = word, pattern = "iti$"),           
+      m > 1 && str_detect(word, "ous$") ~ str_remove(string = word, pattern = "ous$"),           
+      m > 1 && str_detect(word, "ive$") ~ str_remove(string = word, pattern = "ive$"),           
+      m > 1 && str_detect(word, "ize$") ~ str_remove(string = word, pattern = "ize$"), 
       
       TRUE ~ word
-      ))
+    ))
   
-   
-}
+  
+  
+  # Step 5a
+  unigram_df <- unigram_df %>% 
+    mutate(word = case_when(
+      m > 1 && str_detect(word, "e$") ~ str_remove(word, "e$"),
+      m == 1 && !str_detect(word, "[^aeiou]{1}[aeiou]{1}[^aeiou]{1}e$") && str_detect(word, "e$") ~ str_remove(word, "e$"),
+      
+      TRUE ~ word
+      
+    ))
+  
+  
+  # Step 5b
+  unigram_df <- unigram_df %>% 
+    mutate(word = if_else(condition = m > 1 && str_detect(word, "ll$"),
+                          true = str_replace(string = word, pattern = "ll$", replacement = "l"),
+                          false = word
+    ))
+  
+  
+  
+}#end of my_porter_stemmer()
 
 # CALCULATING MEASURE
 words <- c("tree", "trouble", "troubles", "collection", "management", "conclude", "revise", "oaten")
