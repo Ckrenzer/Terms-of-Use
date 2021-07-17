@@ -112,9 +112,14 @@ my_porter_stemmer <- function(unigram_df){
   # Step 1a
   unigram_df <- unigram_df %>% 
     mutate(m = str_count(word, pattern = "[aeiou]+[^aeiou]+"),
-           word = str_replace_all(word, "sses$", "ss") %>% 
-             str_replace_all("ies$", "i") %>% 
-             str_replace("([a-rt-z])(?<!s)s$", "\\1")) #remove final single 's' letters
+           word = case_when(
+             str_detect(word, "sses$") ~ str_replace(word, "sses$", "ss"),
+             str_detect(word, "ies$") ~ str_replace_all(word, "ies$", "i"),
+             str_detect(word, "([^s])s{1,1}$") ~ str_remove(word, "s$"),
+             
+             TRUE ~ word
+             ))
+              
   
   # Step 1b
   unigram_df <- unigram_df %>% 
