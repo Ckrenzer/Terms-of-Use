@@ -109,6 +109,26 @@ my_porter_stemmer <- function(unigram_df){
   # https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/
   
   
+  # Replaces text if the `(*v*) ed ---> _____` or `(*v*) ing ---> ______` cases of Step 1b execute
+  step_1b_helper <- function(word, suffix, m){
+    
+    str_remove(word, suffix) %>% 
+      case_when(
+        str_detect(string = ., pattern = "at$") ~ str_replace(string = ., pattern = "at$", replacement = "ate"),
+        str_detect(string = ., pattern = "bl$") ~ str_replace(string = ., pattern = "bl$", replacement = "ble"),
+        str_detect(string = ., pattern = "iz$") ~ str_replace(string = ., pattern = "iz$", replacement = "ize"),
+        str_detect(string = ., pattern = "([bcdfghjklmnpqrvwxy]){2}$") ~ str_replace(string = ., pattern = "([bcdfghjklmnpqrvwxy]){2}$", replacement = "\\1"), # *d and not (*L, *S, or *Z)) --> single letter
+        m == 1 && str_detect(string = ., pattern = "[^aeiou]{1}[aeiou]{1}[^aeiou]{1}$") ~ str_replace(string = ., pattern = "[^aeiou]{1}[aeiou]{1}[^aeiou]{1}$", replacement = "e"),
+        
+        TRUE ~ .
+      ) %>% 
+      return()
+    
+  }#end of step_1b()
+  
+  
+  
+  
   # Step 1a
   unigram_df <- unigram_df %>% 
     mutate(m = str_count(word, pattern = "[aeiou]+[^aeiou]+"),
@@ -118,23 +138,23 @@ my_porter_stemmer <- function(unigram_df){
              str_detect(word, "([^s])s{1,1}$") ~ str_remove(word, "s$"),
              
              TRUE ~ word
-             ))
-              
+           ))
+  
   
   # Step 1b
   unigram_df <- unigram_df %>% 
-    mutate(word = m > 0 && str_detect(word, "eed$") ~ str_replace(word, "eed$", "ee"),
-           word = case_when(
-             str_detect(word, "ed$") && str_detect(str_sub(word, end = -3), "[aeiou]") ~ step_1b(word = word, suffix = "ed$", m = m),
-             str_detect(word, "ing$") && str_detect(str_sub(word, end = -4), "[aeiou]") ~ step_1b(word = word, suffix = "ing$", m = m),
-             
-             TRUE ~ word
-           ))
+    mutate(word = case_when(
+      m > 0 && str_detect(word, "eed$") ~ str_replace(word, "eed$", "ee"),
+      str_detect(word, "ed$") && str_detect(str_sub(word, end = -3), "[aeiou]") ~ step_1b_helper(word = word, suffix = "ed$", m = m),
+      str_detect(word, "ing$") && str_detect(str_sub(word, end = -4), "[aeiou]") ~ step_1b_helper(word = word, suffix = "ing$", m = m),
+      
+      TRUE ~ word
+    ))
   
   
   # Step 1c
   unigram_df <- unigram_df %>% 
-    mutate(word = if_else(condition = str_detect(word, "y$") && str_detect(str_sub(word, end = -1), "aeiou"),
+    mutate(word = if_else(condition = str_detect(word, "y$") && str_detect(str_sub(word, end = -1), "[aeiou]"),
                           true = str_replace(string = word, pattern = "y$", replacement = "i"),
                           false = word))
   
@@ -232,29 +252,10 @@ my_porter_stemmer <- function(unigram_df){
   
 }#end of my_porter_stemmer()
 
-# CALCULATING MEASURE
-words <- c("tree", "trouble", "troubles", "collection", "management", "conclude", "revise", "oaten")
-measure <- str_count(words, pattern = "[aeiou]+[^aeiou]+")
 
 
 
 
-
-
-step_1b <- function(word, suffix, m){
-  
-  word %>% 
-    str_remove(suffix) %>% 
-    str_replace("at$", "ate") %>% # Begin the 'if the second or third of the rules in step 1b is successful...'
-    str_replace("bl$", "ble") %>% 
-    str_replace("iz$", "ize") %>% 
-    str_replace("([bcdfghjklmnpqrvwxy]){2}$", "\\1") %>%  # *d and not (*L, *S, or *Z)) --> single letter
-    if_else(condition = m == 1, # replace *o with 'e' if m is 1 and do nothing otherwise
-            true = str_replace(string = ., pattern = "[^aeiou]{1}[aeiou]{1}[^aeiou]{1}$", replacement =  "e"),
-            false =  .) %>% 
-    return()
-  
-}#end of step_1b()
 
 
 
