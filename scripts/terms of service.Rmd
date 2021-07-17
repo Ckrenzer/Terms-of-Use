@@ -95,6 +95,7 @@ unigram_counts <- count(unigrams, company, word, sort = FALSE)
 
 ```{r my Porter stemmer}
 
+# Remember as you read this that replacement operations inside the mutate calls refer to entire vectors of words while the operations inside a case_when() call refers to individual words
 my_porter_stemmer <- function(unigram_df){
   # The implementation of the Porter stemmer algorithm as I understand it,
   # described in Julia Silge's book:
@@ -102,31 +103,97 @@ my_porter_stemmer <- function(unigram_df){
   # or more formally from:
   # https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/
   
+  
+  # Step 1a
   unigram_df <- unigram_df %>% 
     mutate(m = str_count(word, pattern = "[aeiou]+[^aeiou]+"),
            word = str_replace_all(word, "sses$", "ss") %>% 
              str_replace_all("ies$", "i") %>% 
              str_replace("([a-rt-z])(?<!s)s$", "\\1")) #remove final single 's' letters
   
+  # Step 1b
+  unigram_df <- unigram_df %>% 
+    mutate(word = m > 0 && str_detect(word, "eed$") ~ str_replace(word, "eed$", "ee"),
+           word = case_when(
+             str_detect(word, "ed$") && str_detect(str_sub(word, end = -3), "[aeiou]") ~ step_1b(word = word, suffix = "ed$", m = m),
+             str_detect(word, "ing$") && str_detect(str_sub(word, end = -4), "[aeiou]") ~ step_1b(word = word, suffix = "ing$", m = m),
+             
+             TRUE ~ word
+           ))
   
   
+  # Step 1c
+  unigram_df <- unigram_df %>% 
+    mutate(word = if_else(condition = str_detect(word, "y$") && str_detect(str_sub(word, end = -1), "aeiou"),
+                          true = str_replace(string = word, pattern = "y$", replacement = "i"),
+                          false = word))
+  
+  # Step 2
   unigram_df <- unigram_df %>% 
     mutate(word = case_when(
+      m > 0 && str_detect(word, "ational$") ~ str_replace(string = word, pattern = "ational$", replacement = "ate"),
+      m > 0 && str_detect(word, "tional$") ~ str_replace(string = word, pattern = "tional$", replacement = "tion"),
+      m > 0 && str_detect(word, "enci$") ~ str_replace(string = word, pattern = "enci$", replacement = "ence"),
+      m > 0 && str_detect(word, "anci$") ~ str_replace(string = word, pattern = "anci$", replacement = "ance"),
+      m > 0 && str_detect(word, "izer$") ~ str_replace(string = word, pattern = "izer$", replacement = "ize"),
+      m > 0 && str_detect(word, "abli$") ~ str_replace(string = word, pattern = "abli$", replacement = "able"),
+      m > 0 && str_detect(word, "alli$") ~ str_replace(string = word, pattern = "alli$", replacement = "al"),
+      m > 0 && str_detect(word, "entli$") ~ str_replace(string = word, pattern = "entli$", replacement = "ent"),
+      m > 0 && str_detect(word, "eli$") ~ str_replace(string = word, pattern = "eli$", replacement = "e"),
+      m > 0 && str_detect(word, "ousli$") ~ str_replace(string = word, pattern = "ousli$", replacement = "ous"),
+      m > 0 && str_detect(word, "ization$") ~ str_replace(string = word, pattern = "ization$", replacement = "ize"),
+      m > 0 && str_detect(word, "ation$") ~ str_replace(string = word, pattern = "ation$", replacement = "ate"),
+      m > 0 && str_detect(word, "ator$") ~ str_replace(string = word, pattern = "ator$", replacement = "ate"),
+      m > 0 && str_detect(word, "alism$") ~ str_replace(string = word, pattern = "alism$", replacement = "al"),
+      m > 0 && str_detect(word, "iveness$") ~ str_replace(string = word, pattern = "iveness$", replacement = "ive"),
+      m > 0 && str_detect(word, "fulness$") ~ str_replace(string = word, pattern = "fulness$", replacement = "ful"),
+      m > 0 && str_detect(word, "ousness$") ~ str_replace(string = word, pattern = "ousness$", replacement = "ous"),
+      m > 0 && str_detect(word, "aliti$") ~ str_replace(string = word, pattern = "aliti$", replacement = "al"),
+      m > 0 && str_detect(word, "iviti$") ~ str_replace(string = word, pattern = "iviti$", replacement = "ive"),
+      m > 0 && str_detect(word, "biliti$") ~ str_replace(string = word, pattern = "biliti$", replacement = "ble"),
+      
+      TRUE ~ word
+    ))
+  
+  
+  
+  # Step 3
+  unigram_df <- unigram_df %>% 
+    mutate(word = case_when(
+      m > 0 && str_detect(word, "$") ~ str_replace(string = word, pattern = "$", replacement = ""),
       
       
       
+      TRUE ~ word
       ))
-  
-  
-  
-  
-  
   
 }
 
 # CALCULATING MEASURE
 words <- c("tree", "trouble", "troubles", "collection", "management", "conclude", "revise", "oaten")
 measure <- str_count(words, pattern = "[aeiou]+[^aeiou]+")
+
+
+
+
+
+
+step_1b <- function(word, suffix, m){
+  
+  word %>% 
+    str_remove(suffix) %>% 
+    str_replace("at$", "ate") %>% # Begin the 'if the second or third of the rules in step 1b is successful...'
+    str_replace("bl$", "ble") %>% 
+    str_replace("iz$", "ize") %>% 
+    str_replace("([bcdfghjklmnpqrvwxy]){2}$", "\\1") %>%  # *d and not (*L, *S, or *Z)) --> single letter
+    if_else(condition = m == 1, # replace *o with 'e' if m is 1 and do nothing otherwise
+            true = str_replace(string = ., pattern = "[^aeiou]{1}[aeiou]{1}[^aeiou]{1}$", replacement =  "e"),
+            false =  .) %>% 
+    return()
+  
+}#end of step_1b()
+
+
 
 
 ```
