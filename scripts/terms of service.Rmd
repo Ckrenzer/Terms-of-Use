@@ -160,13 +160,28 @@ my_porter_stemmer <- function(unigram_df){
   # Step 3
   unigram_df <- unigram_df %>% 
     mutate(word = case_when(
+      m > 0 && str_detect(word, "icate$") ~ str_replace(string = word, pattern = "icate$", replacement = "ic"),
+      m > 0 && str_detect(word, "ative$") ~ str_remove(string = word, pattern = "ative$"),
+      m > 0 && str_detect(word, "alize$") ~ str_replace(string = word, pattern = "alize$", replacement = "al"),
+      m > 0 && str_detect(word, "iciti$") ~ str_replace(string = word, pattern = "iciti$", replacement = "ic"),
+      m > 0 && str_detect(word, "ical$") ~ str_replace(string = word, pattern = "ical$", replacement = "ic"),
+      m > 0 && str_detect(word, "ful$") ~ str_remove(string = word, pattern = "ful$"),
+      m > 0 && str_detect(word, "ness$") ~ str_remove(string = word, pattern = "ness$"),
+      
+      TRUE ~ word
+      ))
+ 
+  
+  
+  # Step 4
+  unigram_df <- unigram_df %>% 
+    mutate(word = case_when(
       m > 0 && str_detect(word, "$") ~ str_replace(string = word, pattern = "$", replacement = ""),
-      
-      
       
       TRUE ~ word
       ))
   
+   
 }
 
 # CALCULATING MEASURE
