@@ -137,6 +137,20 @@ Before doing further work with these documents, they will need some pre-processi
 
 I will be using the Porter stemming algorithm to pre-process the text. While in an industrious mood, I decided to implement the algorithm myself using [this article](https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/) and the [algorithm's official web page](https://tartarus.org/martin/PorterStemmer/index.html) as guides. After many hours tweaking the algorithm's intricacies, my implementation returns the same result as the official implementation in the [SnowballC package](https://CRAN.R-project.org/package=SnowballC) 98% of the time when using this dataset.
 
+
+Differences between the Snowball version and mine include:
+
+-   Differences between the guides used (which walked through the original algorithm) and the slightly modified Snowball algorithm (the Snowball algorithm is also known as the 'Porter2' stemmer to differentiate it from the originally published algorithm).
+
+-   Random errors that slip through the cracks due to regular expressions used, **m** calculation rules, and other oddities.
+
+-   My version strips contractions before stemming ("aren't" becomes "are", "they'll" becomes "they", etc.).
+
+-   My version uses a 'tidy' format--it takes a data frame and column name as input and return the original data frame after stemming the words in the specified column.
+
+-   Speed. My version is about 300 times slower than the SnowballC package's implementation. This is primarily due to the copying of the data frame after each dplyr::mutate() call in my code. This difference is not very important here, since my version takes two seconds to run on this data set while Snowball takes .008 seconds. It is noticeably slower, but not enough for it to actually matter for this use-case.
+
+
 Doing this taught me the value of writing an algorithm yourself; rewriting and implementing an algorithm from scratch is a very effective way to learn how it works. Having the code to run the algorithm handy **and** knowing the algorithm inside and out grants unique opportunities to make improvements that better suit your needs.
 
 
