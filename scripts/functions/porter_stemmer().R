@@ -150,7 +150,8 @@ porter_stemmer <- function(unigram_df, text_column = "word"){
            {{text_column}} := {case_when(str_detect(get(text_column), "\\d") ~ get(text_column),
                                          m > 1 & str_detect(get(text_column), "ll$") ~ str_replace(string = get(text_column), pattern = "ll$", replacement = "l"),
                                          TRUE ~ get(text_column)
-           )})
+           )}) %>% 
+    dplyr::select(-m)
   
   
   return(unigram_df)
