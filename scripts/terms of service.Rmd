@@ -99,10 +99,13 @@ unigram_counts <- count(unigrams, company, word, sort = FALSE)
 
 
 ```{r my Porter stemmer}
+identical(
+wordStem(words = arrange(unigrams, desc(word))$word, language = "porter")[22000:23000],
 
-wordStem(words = unigrams$word, language = "porter")
+porter_stemmer(unigram_df = arrange(unigrams, desc(word)))$word[22000:23000]
+)
 
-porter_stemmer(unigram_df = unigrams)$word
+
 
 identical(wordStem(words = unigrams$word, language = "porter"),
 porter_stemmer(unigram_df = unigrams)$word)
