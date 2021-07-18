@@ -1,5 +1,5 @@
 # Remember as you read this that replacement operations inside the mutate calls refer to entire vectors of words while the operations inside a case_when() call refers to individual words
-porter_stemmer <- function(unigram_df){
+porter_stemmer <- function(unigram_df, text_column){
   # The implementation of the Porter stemmer algorithm as I understand it,
   # as described in:
   # https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/
@@ -10,7 +10,7 @@ porter_stemmer <- function(unigram_df){
   # Step 1a
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(word),
-           word = {case_when(
+           {{text_column}} := {case_when(
              str_detect(word, "sses$") ~ str_replace(word, "sses$", "ss"),
              str_detect(word, "ies$") ~ str_replace_all(word, "ies$", "i"),
              str_detect(word, "([^s])s{1,1}$") ~ str_remove(word, "s$"),
@@ -22,7 +22,7 @@ porter_stemmer <- function(unigram_df){
   # Step 1b
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(word),
-           word = {case_when(
+           {{text_column}} := {case_when(
              m > 0 & str_detect(word, "eed$") ~ str_replace(word, "eed$", "ee"),
              str_detect(word, "ed$") & str_detect(str_sub(word, end = -3), "[aeiou]") ~ step_1b_helper(word = word, suffix = "ed$", m = m),
              str_detect(word, "ing$") & str_detect(str_sub(word, end = -4), "[aeiou]") ~ step_1b_helper(word = word, suffix = "ing$", m = m),
@@ -33,13 +33,13 @@ porter_stemmer <- function(unigram_df){
   
   # Step 1c
   unigram_df <- unigram_df %>% 
-    mutate(word = {case_when(str_detect(word, "y$") & str_detect(str_sub(word, end = -1), "[aeiou]") ~ str_replace(string = word, pattern = "y$", replacement = "i"),
+    mutate({{text_column}} := {case_when(str_detect(word, "y$") & str_detect(str_sub(word, end = -1), "[aeiou]") ~ str_replace(string = word, pattern = "y$", replacement = "i"),
                              TRUE ~ word)})
   
   # Step 2
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(word),
-           word = {case_when(
+           {{text_column}} := {case_when(
       m > 0 & str_detect(word, "ational$") ~ str_replace(string = word, pattern = "ational$", replacement = "ate"),
       m > 0 & str_detect(word, "tional$") ~ str_replace(string = word, pattern = "tional$", replacement = "tion"),
       m > 0 & str_detect(word, "enci$") ~ str_replace(string = word, pattern = "enci$", replacement = "ence"),
@@ -69,7 +69,7 @@ porter_stemmer <- function(unigram_df){
   # Step 3
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(word),
-           word = {case_when(
+           {{text_column}} := {case_when(
       m > 0 & str_detect(word, "icate$") ~ str_replace(string = word, pattern = "icate$", replacement = "ic"),
       m > 0 & str_detect(word, "ative$") ~ str_remove(string = word, pattern = "ative$"),
       m > 0 & str_detect(word, "alize$") ~ str_replace(string = word, pattern = "alize$", replacement = "al"),
@@ -86,7 +86,7 @@ porter_stemmer <- function(unigram_df){
   # Step 4
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(word),
-           word = {case_when(
+           {{text_column}} := {case_when(
       m > 1 & str_detect(word, "al$") ~ str_remove(string = word, pattern = "al$"),
       m > 1 & str_detect(word, "ance$") ~ str_remove(string = word, pattern = "ance$"),
       m > 1 & str_detect(word, "ence$") ~ str_remove(string = word, pattern = "ence$"),
@@ -115,7 +115,7 @@ porter_stemmer <- function(unigram_df){
   # Step 5a
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(word),
-           word = {case_when(
+           {{text_column}} := {case_when(
       m > 1 & str_detect(word, "e$") ~ str_remove(word, "e$"),
       m == 1 & !str_detect(word, "[^aeiou]{1}[aeiou]{1}[^aeiou]{1}e$") & str_detect(word, "e$") ~ str_remove(word, "e$"),
       
@@ -127,7 +127,7 @@ porter_stemmer <- function(unigram_df){
   # Step 5b
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(word),
-           word = {case_when(m > 1 & str_detect(word, "ll$") ~ str_replace(string = word, pattern = "ll$", replacement = "l"),
+           {{text_column}} := {case_when(m > 1 & str_detect(word, "ll$") ~ str_replace(string = word, pattern = "ll$", replacement = "l"),
                              TRUE ~ word
     )})
   

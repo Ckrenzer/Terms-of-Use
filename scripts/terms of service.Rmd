@@ -15,6 +15,28 @@ Much of the data I work with originates from web scraping. In the event you didn
 
 The motivation for this investigation is a direct response to the anti-scraping policies so prevalent online. If the companies aren't going to allow people to scrape their data, I can at least scrape their terms of use! These documents will be used to draw conclusions about the companies more broadly.
 
+
+### Links to Policies
+
+This section is certain to become outdated in the future, so if you want to see the raw text used in this project, read the text files in the 'data' folder of [this project's GitHub repository](https://github.com/Ckrenzer/Terms-of-Use). The links used to get this information, however, are still provided below:
+
+-   [LinkedIn's policy](https://www.linkedin.com/legal/user-agreement?trk=hb_ft_userag)
+
+-   [Facebook's policy](https://www.facebook.com/legal/terms)
+
+-   [YouTube's policy](https://www.youtube.com/t/terms)
+
+-   [Amazon's policy](https://www.amazon.com/gp/help/customer/display.html?nodeId=508088&ref_=footer_cou)
+
+-   [Spotify's policy](https://www.spotify.com/us/legal/end-user-agreement/)
+
+-   [GitHub's policy](https://docs.github.com/en/github/site-policy/github-terms-of-service)
+
+-   [DuckDuckGo's policy](https://duckduckgo.com/privacy)
+
+
+I couldn't find a terms of use agreement for DuckDuckGo, likely because of the lax nature of their rules, so their privacy policy is used in place of a terms of use agreement. DuckDuckGo had to be included in this list as the 'outsider' that essentially lets you do whatever you want with the data collected from its search engine.
+
 ```{r setup-packages, include = FALSE}
 
 knitr::opts_chunk$set(echo = FALSE,
@@ -78,12 +100,11 @@ tos <- readtext(file = "data/") %>%
 ```
 
 
+# Document Lengths
 
+To begin, why don't we calculate the length of each document? If you don't feel like navigating to the web pages hosting these documents yourself, this will save you some time! To calculate the length, the number of characters used in the document are counted. This includes all characters--newlines, punctuation, letters, digits, everything. While this may be considered imperfect, it gives us a 'good-enough' rough estimate for the length of each terms of use agreement.
 
-
-
-
-
+Which company has the longest terms of use agreement?
 
 
 
@@ -107,18 +128,20 @@ tos %>%
 ```
 
 
-Does this mean that refusing to track user data equates to needing fewer lawyers? I am inclined to think so, but the above graph is incapable of confirming this suspicion because of differences intrinsic in the services these companies provide. Further, Amazon--the largest company in the bunch--has a shorter terms of use page than its contemporaries. One explanation is that these companies spread a bunch of legal information off into different sections of its website to organize their policies into logical chunks.
+Unsurprisingly, DuckDuckGo has the shortest policy. Does this mean that refusing to track user data equates to needing fewer lawyers? I am inclined to think so, but the above graph is incapable of confirming this suspicion because of differences intrinsic to the services provided by these companies. Further, Amazon--the largest company in the bunch by annual revenue--has a shorter terms of use page than its contemporaries. One explanation among many is that these companies spread legal documents out into different sections of their websites to organize policies into logical chunks.
 
 
 # Data Prep
 
-I will be using the Porter stemming algorithm to pre-process the text. While in an industrious mood, I decided to implement the algorithm myself using [this article](https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/) and the [algorithm's official webpage](https://tartarus.org/martin/PorterStemmer/index.html) as guides. After many hours tweaking the intricacies of this algorithm, my implementation returns the same result as the official implementation in the [SnowballC package](https://CRAN.R-project.org/package=SnowballC) 98% of the time when using this dataset.
+Before doing further work with these documents, they will need some pre-processing. 
 
-Doing this taught me the value of writing an algorithm yourself; rewriting and implementing an algorithm from scratch is a very effective way to learn how it works. Having the code to run the algorithm, **and** knowing the algorithm inside and out grants unique opportunities to make improvements that better suit your needs.
+I will be using the Porter stemming algorithm to pre-process the text. While in an industrious mood, I decided to implement the algorithm myself using [this article](https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/) and the [algorithm's official web page](https://tartarus.org/martin/PorterStemmer/index.html) as guides. After many hours tweaking the algorithm's intricacies, my implementation returns the same result as the official implementation in the [SnowballC package](https://CRAN.R-project.org/package=SnowballC) 98% of the time when using this dataset.
+
+Doing this taught me the value of writing an algorithm yourself; rewriting and implementing an algorithm from scratch is a very effective way to learn how it works. Having the code to run the algorithm handy **and** knowing the algorithm inside and out grants unique opportunities to make improvements that better suit your needs.
 
 
 
-```{r unigrams and stemming}
+```{r unigrams}
 
 unigrams <- tos %>% 
   unnest_tokens(word, text) %>% 
