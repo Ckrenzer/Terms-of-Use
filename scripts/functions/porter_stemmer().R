@@ -7,6 +7,19 @@ porter_stemmer <- function(unigram_df, text_column = "word"){
   # and the official website:
   # https://tartarus.org/martin/PorterStemmer/index.html
   
+  
+  # Removing contractions before Porter stemming
+  # Words like "won't", "shan't", "ain't" and "can't" are dealt with
+  # directly, and words like "o'clock" are only stripped of their apostrophes
+  unigram_df <- unigram_df %>% 
+    mutate({{text_column}} := str_replace(get(text_column), "won't", "will") %>% 
+             str_replace("shan't", "shall") %>%
+             str_replace("ain't", "am") %>% 
+             str_replace("can't", "can") %>% 
+             str_remove(common_contractions) %>% 
+             str_remove("'"))
+  
+  
   # Step 1a
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(get(text_column)),

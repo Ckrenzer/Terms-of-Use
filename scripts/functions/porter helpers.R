@@ -1,3 +1,11 @@
+# Contractions that we want to remove
+# You will miss words like "won't", "shan't", "o'clock", "ain't" and "can't" with this setup
+# sp those words should be dealt with separately
+common_contractions <- c("'re", "'d", "'s", "s'", "n't", "'ve", "'ll", "'m") %>% 
+  str_c(collapse = "|")
+
+
+
 # We ignore the end of the word if it contains these suffixes
 # (used in calculate_m(), but is placed here to avoid running this code repeatedly)
 suffixes_to_ignore <- c(

@@ -140,7 +140,7 @@ I will be using the Porter stemming algorithm to pre-process the text. While in 
 
 Differences between the Snowball version and mine include:
 
--   Differences between the guides used (which walked through the original algorithm) and the slightly modified Snowball algorithm (the Snowball algorithm is also known as the 'Porter2' stemmer to differentiate it from the originally published algorithm).
+-   Differences between the logic in the guides used (which walked through the original algorithm) and the slightly modified Snowball algorithm (the Snowball algorithm is also known as the 'Porter2' stemmer to differentiate it from the originally published algorithm).
 
 -   Random errors that slip through the cracks due to regular expressions used, **m** calculation rules, and other oddities.
 
