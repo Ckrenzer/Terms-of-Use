@@ -24,6 +24,7 @@ porter_stemmer <- function(unigram_df, text_column = "word"){
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(get(text_column)),
            {{text_column}} := {case_when(
+             str_detect(get(text_column), "\\d") ~ get(text_column),
              str_detect(get(text_column), "sses$") ~ str_replace(get(text_column), "sses$", "ss"),
              str_detect(get(text_column), "ies$") ~ str_replace_all(get(text_column), "ies$", "i"),
              str_detect(get(text_column), "([^s])s{1,1}$") ~ str_remove(get(text_column), "s$"),
@@ -36,6 +37,7 @@ porter_stemmer <- function(unigram_df, text_column = "word"){
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(get(text_column)),
            {{text_column}} := {case_when(
+             str_detect(get(text_column), "\\d") ~ get(text_column),
              m > 0 & str_detect(get(text_column), "eed$") ~ str_replace(get(text_column), "eed$", "ee"),
              str_detect(get(text_column), "ed$") & str_detect(str_sub(get(text_column), end = -3), "[aeiou]") ~ step_1b_helper(word = get(text_column), suffix = "ed$", m = m),
              str_detect(get(text_column), "ing$") & str_detect(str_sub(get(text_column), end = -4), "[aeiou]") ~ step_1b_helper(word = get(text_column), suffix = "ing$", m = m),
@@ -46,13 +48,15 @@ porter_stemmer <- function(unigram_df, text_column = "word"){
   
   # Step 1c
   unigram_df <- unigram_df %>% 
-    mutate({{text_column}} := {case_when(str_detect(get(text_column), "y$") & str_detect(str_sub(get(text_column), end = -1), "[aeiou]") ~ str_replace(string = get(text_column), pattern = "y$", replacement = "i"),
+    mutate({{text_column}} := {case_when(str_detect(get(text_column), "\\d") ~ get(text_column),
+                                         str_detect(get(text_column), "y$") & str_detect(str_sub(get(text_column), end = -1), "[aeiou]") ~ str_replace(string = get(text_column), pattern = "y$", replacement = "i"),
                                          TRUE ~ get(text_column))})
   
   # Step 2
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(get(text_column)),
            {{text_column}} := {case_when(
+             str_detect(get(text_column), "\\d") ~ get(text_column),
              m > 0 & str_detect(get(text_column), "ational$") ~ str_replace(string = get(text_column), pattern = "ational$", replacement = "ate"),
              m > 0 & str_detect(get(text_column), "tional$") ~ str_replace(string = get(text_column), pattern = "tional$", replacement = "tion"),
              m > 0 & str_detect(get(text_column), "enci$") ~ str_replace(string = get(text_column), pattern = "enci$", replacement = "ence"),
@@ -83,6 +87,7 @@ porter_stemmer <- function(unigram_df, text_column = "word"){
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(get(text_column)),
            {{text_column}} := {case_when(
+             str_detect(get(text_column), "\\d") ~ get(text_column),
              m > 0 & str_detect(get(text_column), "icate$") ~ str_replace(string = get(text_column), pattern = "icate$", replacement = "ic"),
              m > 0 & str_detect(get(text_column), "ative$") ~ str_remove(string = get(text_column), pattern = "ative$"),
              m > 0 & str_detect(get(text_column), "alize$") ~ str_replace(string = get(text_column), pattern = "alize$", replacement = "al"),
@@ -100,6 +105,7 @@ porter_stemmer <- function(unigram_df, text_column = "word"){
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(get(text_column)),
            {{text_column}} := {case_when(
+             str_detect(get(text_column), "\\d") ~ get(text_column),
              m > 1 & str_detect(get(text_column), "al$") ~ str_remove(string = get(text_column), pattern = "al$"),
              m > 1 & str_detect(get(text_column), "ance$") ~ str_remove(string = get(text_column), pattern = "ance$"),
              m > 1 & str_detect(get(text_column), "ence$") ~ str_remove(string = get(text_column), pattern = "ence$"),
@@ -129,6 +135,7 @@ porter_stemmer <- function(unigram_df, text_column = "word"){
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(get(text_column)),
            {{text_column}} := {case_when(
+             str_detect(get(text_column), "\\d") ~ get(text_column),
              m > 1 & str_detect(get(text_column), "e$") ~ str_remove(get(text_column), "e$"),
              m == 1 & !str_detect(get(text_column), "[^aeiou]{1}[aeiou]{1}[^aeiou]{1}e$") & str_detect(get(text_column), "e$") ~ str_remove(get(text_column), "e$"),
              
@@ -140,7 +147,8 @@ porter_stemmer <- function(unigram_df, text_column = "word"){
   # Step 5b
   unigram_df <- unigram_df %>% 
     mutate(m = calculate_m(get(text_column)),
-           {{text_column}} := {case_when(m > 1 & str_detect(get(text_column), "ll$") ~ str_replace(string = get(text_column), pattern = "ll$", replacement = "l"),
+           {{text_column}} := {case_when(str_detect(get(text_column), "\\d") ~ get(text_column),
+                                         m > 1 & str_detect(get(text_column), "ll$") ~ str_replace(string = get(text_column), pattern = "ll$", replacement = "l"),
                                          TRUE ~ get(text_column)
            )})
   
