@@ -9,7 +9,11 @@ editor_options:
 
 # Introduction
 
-Add writing here.
+The next time you go on your favorite website, scroll down to the bottom of the page and look at all the links to different sections of the company. One of these will surely be the terms of service agreement that you consent to abide by while using their platform. No one bothers reading them unless he or she plans on doing something that has the potential to bring negative repercussions.
+
+Much of the data I work with originates from web scraping. In the event you didn't know, most companies hate web scrapers for two reasons: (1) because of legitimate data privacy concerns, and (2) because companies want to sell the information that is easily acquired for free by a scraper. To put up barriers between data and people at least somewhat competent with a programming language, companies add red tape to their services in the form of a terms of use agreement. If you violate the terms of use, depending on the severity of the offense, you can get anything from suspended, banned, sued, or even criminally prosecuted. Make no mistake, there is a great deal of data out there that currently is and should continue to be off limits--public or not. It is the second case from which the bulk of my issues arise. Yes, intellectual property rights exist for good reason, but the problem for people like me, however, is that excessive red tape hinders us while seeking answers to interesting questions.
+
+The motivation for this investigation is a direct response to the anti-scraping policies so prevalent online. If the companies aren't going to allow people to scrape their data, I can at least scrape their terms of use! These documents will be used to draw conclusions about the companies more broadly.
 
 ```{r setup-packages, include = FALSE}
 
@@ -75,6 +79,14 @@ tos <- readtext(file = "data/") %>%
 
 
 
+
+
+
+
+
+
+
+
 ```{r number of characters}
 
 tos %>% 
@@ -100,7 +112,7 @@ Does this mean that refusing to track user data equates to needing fewer lawyers
 
 # Data Prep
 
-I will be using the Porter stemming algorithm to pre-process the text. While in an industrious mood, I decided to implement the algorithm myself using the [this article](https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/) and the [algorithm's official webpage](https://tartarus.org/martin/PorterStemmer/index.html) as guides. After many hours tweaking the intricacies of this algorithm, my implementation returns the same result as the official implementation in the [SnowballC package](https://CRAN.R-project.org/package=SnowballC) 98% of the time when using this dataset.
+I will be using the Porter stemming algorithm to pre-process the text. While in an industrious mood, I decided to implement the algorithm myself using [this article](https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/) and the [algorithm's official webpage](https://tartarus.org/martin/PorterStemmer/index.html) as guides. After many hours tweaking the intricacies of this algorithm, my implementation returns the same result as the official implementation in the [SnowballC package](https://CRAN.R-project.org/package=SnowballC) 98% of the time when using this dataset.
 
 Doing this taught me the value of writing an algorithm yourself; rewriting and implementing an algorithm from scratch is a very effective way to learn how it works. Having the code to run the algorithm, **and** knowing the algorithm inside and out grants unique opportunities to make improvements that better suit your needs.
 
@@ -110,7 +122,7 @@ Doing this taught me the value of writing an algorithm yourself; rewriting and i
 
 unigrams <- tos %>% 
   unnest_tokens(word, text) %>% 
-  porter_stemmer(unigram_df = unigrams)
+  porter_stemmer(unigram_df = .)
 
 
 ungrouped_unigram_counts <- count(unigrams, word, sort = FALSE)
