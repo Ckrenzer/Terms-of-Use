@@ -145,7 +145,7 @@ Doing this taught me the value of writing an algorithm yourself; rewriting and i
 
 unigrams <- tos %>% 
   unnest_tokens(word, text) %>% 
-  porter_stemmer(unigram_df = .)
+  porter_stemmer(unigram_df = ., text_column = "word")
 
 
 ungrouped_unigram_counts <- count(unigrams, word, sort = FALSE)
