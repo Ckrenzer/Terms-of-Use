@@ -50,13 +50,13 @@ company_colors <- c(Amazon = "#FF9900",
 # SOURCING FILES
 # This function comes courtesy of the folks writing the source() help page
 sourceDir <- function(path, trace = TRUE, ...) {
-    op <- options(); on.exit(options(op)) # to reset after each 
-    for (nm in list.files(path, pattern = "[.][RrSsQq]$")) {
-       if(trace) cat(nm,":")
-       source(file.path(path, nm), ...)
-       if(trace) cat("\n")
-       options(op)
-    }
+  op <- options(); on.exit(options(op)) # to reset after each 
+  for (nm in list.files(path, pattern = "[.][RrSsQq]$")) {
+    if(trace) cat(nm,":")
+    source(file.path(path, nm), ...)
+    if(trace) cat("\n")
+    options(op)
+  }
 }
 
 # Loading in helper functions and related objects
@@ -70,7 +70,6 @@ tos <- readtext(file = "data/") %>%
   rename(company = doc_id) %>% 
   mutate(company = str_remove_all(company, "_Terms_of_Service.txt"),
          text = str_to_lower(text))
-
 
 ```
 
@@ -106,20 +105,13 @@ I will be using the Porter stemming algorithm to pre-process the text. While in 
 Doing this taught me the value of writing an algorithm yourself; rewriting and implementing an algorithm from scratch is a very effective way to learn how it works. Having the code to run the algorithm, **and** knowing the algorithm inside and out grants unique opportunities to make improvements that better suit your needs.
 
 
-```{r stemming}
 
-unigrams <- porter_stemmer(unigram_df = unigrams)
-
-```
-
-
-
-
-
-```{r unigrams}
+```{r unigrams and stemming}
 
 unigrams <- tos %>% 
-  unnest_tokens(word, text)
+  unnest_tokens(word, text) %>% 
+  porter_stemmer(unigram_df = unigrams)
+
 
 ungrouped_unigram_counts <- count(unigrams, word, sort = FALSE)
 unigram_counts <- count(unigrams, company, word, sort = FALSE)
@@ -152,7 +144,7 @@ ungrouped_unigram_counts %>%
 
 ungrouped_unigram_counts %>%  
   filter(!word %in% stop_words$word) %>% 
-  slice_max(order_by = n, n = 25) %>% as.data.frame
+  slice_max(order_by = n, n = 25)
 
 ```
 
