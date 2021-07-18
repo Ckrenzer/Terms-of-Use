@@ -31,7 +31,7 @@ pacman::p_load(readtext)
 pacman::p_load(stringr, dplyr, ggplot2)
 
 # Text Mining Packages
-pacman::p_load(tidytext, textdata, SnowballC)
+pacman::p_load(tidytext, textdata)
 
 # Setting ggplot to the dark theme
 ggplot2::theme_set(theme_dark())
@@ -43,6 +43,25 @@ company_colors <- c(Amazon = "#FF9900",
                     LinkedIn = "#007bb6",
                     Spotify = "#1DB954",
                     YouTube = "#FF0000")
+
+
+
+
+# SOURCING FILES
+# This function comes courtesy of the folks writing the source() help page
+sourceDir <- function(path, trace = TRUE, ...) {
+    op <- options(); on.exit(options(op)) # to reset after each 
+    for (nm in list.files(path, pattern = "[.][RrSsQq]$")) {
+       if(trace) cat(nm,":")
+       source(file.path(path, nm), ...)
+       if(trace) cat("\n")
+       options(op)
+    }
+}
+
+# Loading in helper functions and related objects
+sourceDir(path = "scripts/functions/")
+
 
 
 
@@ -80,6 +99,18 @@ tos %>%
 Does this mean that refusing to track user data equates to needing fewer lawyers? I am inclined to think so, but the above graph is incapable of confirming this suspicion because of differences intrinsic in the services these companies provide. Further, Amazon--the largest company in the bunch--has a shorter terms of use page than its contemporaries. One explanation is that these companies spread a bunch of legal information off into different sections of its website to organize their policies into logical chunks.
 
 
+# Data Prep
+
+I will be using the Porter stemming algorithm to pre-process the text. While in an industrious mood, I decided to implement the algorithm myself using the [this article](https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/) and the [algorithm's official webpage](https://tartarus.org/martin/PorterStemmer/index.html) as guides. After many hours tweaking the intricacies of this algorithm, my implementation returns the same result as the official implementation in the [SnowballC package](https://CRAN.R-project.org/package=SnowballC) 98% of the time when using this dataset.
+
+Doing this taught me the value of writing an algorithm yourself; rewriting and implementing an algorithm from scratch is a very effective way to learn how it works. Having the code to run the algorithm, **and** knowing the algorithm inside and out grants unique opportunities to make improvements that better suit your needs.
+
+
+```{r stemming}
+
+unigrams <- porter_stemmer(unigram_df = unigrams)
+
+```
 
 
 
@@ -98,20 +129,6 @@ unigram_counts <- count(unigrams, company, word, sort = FALSE)
 
 
 
-```{r my Porter stemmer}
-identical(
-wordStem(words = arrange(unigrams, desc(word))$word, language = "porter")[22000:23000],
-
-porter_stemmer(unigram_df = arrange(unigrams, desc(word)))$word[22000:23000]
-)
-
-
-
-identical(wordStem(words = unigrams$word, language = "porter"),
-porter_stemmer(unigram_df = unigrams)$word)
-
-
-```
 
 
 
