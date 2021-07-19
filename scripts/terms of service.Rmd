@@ -15,7 +15,6 @@ Much of the data I work with originates from web scraping. In the event you didn
 
 The motivation for this investigation is a direct response to the anti-scraping policies so prevalent online. If the companies aren't going to allow people to scrape their data, I can at least scrape their terms of use! These documents will be used to draw conclusions about the companies more broadly.
 
-
 ### Links to Policies
 
 This section is certain to become outdated in the future, so if you want to see the raw text used in this project, read the text files in the 'data' folder of [this project's GitHub repository](https://github.com/Ckrenzer/Terms-of-Use). The links used to get this information, however, are still provided below:
@@ -33,7 +32,6 @@ This section is certain to become outdated in the future, so if you want to see 
 -   [GitHub's policy](https://docs.github.com/en/github/site-policy/github-terms-of-service)
 
 -   [DuckDuckGo's policy](https://duckduckgo.com/privacy)
-
 
 I couldn't find a terms of use agreement for DuckDuckGo, likely because of the lax nature of their rules, so their privacy policy is used in place of a terms of use agreement. DuckDuckGo had to be included in this list as the 'outsider' that essentially lets you do whatever you want with the data collected from its search engine.
 
@@ -102,14 +100,11 @@ tos <- readtext(file = "data/") %>%
 
 ```
 
-
 # Document Lengths
 
 To begin, why don't we calculate the length of each document? If you don't feel like navigating to the web pages hosting these documents yourself, this will save you some time! To calculate the length, the number of characters used in the document are counted. This includes all characters--newlines, punctuation, letters, digits, everything. While this may be considered imperfect, it gives us a 'good-enough' rough estimate for the length of each terms of use agreement.
 
 Which company has the longest terms of use agreement?
-
-
 
 ```{r number of characters}
 
@@ -130,16 +125,13 @@ tos %>%
 
 ```
 
-
 Unsurprisingly, DuckDuckGo has the shortest policy. Does this mean that refusing to track user data equates to needing fewer lawyers? I am inclined to think so, but the above graph is incapable of confirming this suspicion because of differences intrinsic to the services provided by these companies. Further, Amazon--the largest company in the bunch by annual revenue--has a shorter terms of use page than its contemporaries. One explanation among many is that these companies spread legal documents out into different sections of their websites to organize policies into logical chunks.
-
 
 # Data Prep
 
-Before doing further work with these documents, they will need some pre-processing. 
+Before doing further work with these documents, they will need some pre-processing.
 
 I will be using the Porter stemming algorithm to pre-process the text. While in an industrious mood, I decided to implement the algorithm myself using [this article](https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/) and the [algorithm's official web page](https://tartarus.org/martin/PorterStemmer/index.html) as guides. After many hours tweaking the algorithm's intricacies, my implementation returns the same result as the official implementation in the [SnowballC package](https://CRAN.R-project.org/package=SnowballC) 98% of the time when using this dataset.
-
 
 Differences between the Snowball version and mine include:
 
@@ -153,15 +145,11 @@ Differences between the Snowball version and mine include:
 
 -   Speed. My version is about 300 times slower than the SnowballC package's implementation. This is primarily due to the copying of the data frame after each dplyr::mutate() call in my code. This difference is not very important here, since my version takes two seconds to run on this data set while Snowball takes .008 seconds. It is noticeably slower, but not enough for it to actually matter for this use-case.
 
-
 Doing this taught me the value of writing an algorithm yourself; rewriting and implementing an algorithm from scratch is a very effective way to learn how it works. Having the code to run the algorithm handy **and** knowing the algorithm inside and out grants unique opportunities to make improvements that better suit your needs.
-
-
 
 # Word Counts
 
 Onto the good stuff!
-
 
 ```{r unigrams}
 
@@ -175,13 +163,6 @@ ungrouped_unigram_counts <- count(unigrams, word, sort = FALSE)
 unigram_counts <- count(unigrams, company, word, sort = FALSE)
 
 ```
-
-
-
-
-
-
-
 
 ```{r ungrouped common words}
 
@@ -198,12 +179,6 @@ ungrouped_unigram_counts %>%
   coord_flip()
 
 ```
-
-
-
-
-
-
 
 ```{r common words by company, fig.height = 9}
 
@@ -229,5 +204,3 @@ common_words_by_company <- function(df, company_name){
 common_words_by_company(unigram_counts, "Amazon") + common_words_by_company(unigram_counts, "DuckDuckGo") + common_words_by_company(unigram_counts, "Facebook") + common_words_by_company(unigram_counts, "GitHub") + common_words_by_company(unigram_counts, "LinkedIn") + common_words_by_company(unigram_counts, "Spotify") + common_words_by_company(unigram_counts, "YouTube") + plot_annotation(title = "Most Common Words in each User Agreement")
 
 ```
-
-
