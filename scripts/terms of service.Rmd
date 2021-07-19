@@ -54,7 +54,10 @@ if(!require(pacman)) install.packages("pacman")
 pacman::p_load(readtext)
 
 # General Packages
-pacman::p_load(stringr, dplyr, ggplot2)
+pacman::p_load(stringr, dplyr)
+
+# Plotting Packages
+pacman::p_load(ggplot2, patchwork)
 
 # Text Mining Packages
 pacman::p_load(tidytext, textdata)
@@ -155,10 +158,16 @@ Doing this taught me the value of writing an algorithm yourself; rewriting and i
 
 
 
+# Word Counts
+
+Onto the good stuff!
+
+
 ```{r unigrams}
 
 unigrams <- tos %>% 
   unnest_tokens(word, text) %>% 
+  filter(!word %in% stop_words$word) %>% 
   porter_stemmer(unigram_df = ., text_column = "word")
 
 
@@ -174,7 +183,7 @@ unigram_counts <- count(unigrams, company, word, sort = FALSE)
 
 
 
-```{r common words}
+```{r ungrouped common words}
 
 ungrouped_unigram_counts %>%  
   filter(!word %in% stop_words$word,
@@ -188,12 +197,36 @@ ungrouped_unigram_counts %>%
   ylab("Number of Uses") +
   coord_flip()
 
+```
 
 
 
-ungrouped_unigram_counts %>%  
-  filter(!word %in% stop_words$word) %>% 
-  slice_max(order_by = n, n = 25)
+
+
+
+
+```{r common words by company, fig.height = 9}
+
+common_words_by_company <- function(df, company_name){
+  
+  df %>% 
+    filter(!word %in% stop_words$word,
+           word != "â",
+           company == company_name) %>% 
+    slice_max(order_by = n, n = 15) %>% 
+    ggplot() +
+    geom_col(mapping = aes(x = reorder(word, n), y = n, fill = company),
+             show.legend = FALSE) +
+    ggtitle(company_name) +
+    xlab(NULL) +
+    ylab("Number of Uses") +
+    scale_fill_manual(values = company_colors[company_name]) +
+    coord_flip() %>% 
+    return()
+  
+}
+
+common_words_by_company(unigram_counts, "Amazon") + common_words_by_company(unigram_counts, "DuckDuckGo") + common_words_by_company(unigram_counts, "Facebook") + common_words_by_company(unigram_counts, "GitHub") + common_words_by_company(unigram_counts, "LinkedIn") + common_words_by_company(unigram_counts, "Spotify") + common_words_by_company(unigram_counts, "YouTube") + plot_annotation(title = "Most Common Words in each User Agreement")
 
 ```
 
