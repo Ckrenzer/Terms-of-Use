@@ -35,6 +35,11 @@ This section is certain to become outdated in the future, so if you want to see 
 
 I couldn't find a terms of use agreement for DuckDuckGo, likely because of the lax nature of their rules, so their privacy policy is used in place of a terms of use agreement. DuckDuckGo had to be included in this list as the 'outsider' that essentially lets you do whatever you want with the data collected from its search engine.
 
+
+### A Message to the Reader
+
+You may find this project reminiscent of the Fed Minutes Analysis. This study differs in several ways. Namely, several of the algorithms used here are written 'by-hand' without reliance on external libraries. Doing this has been incredibly helpful understanding the logic built into common frameworks for natural language processing and hopefully inspires the people reading this to try re-writing algorithms they use to gain a better understanding (or at least a greater appreciation!) of them. Further, the terms of use agreement is cross-sectional--we are not following the same organization across many years but instead compare different groups at one point in time. Finally--and most importantly, since we are ultimately concerned with results--Terms of Use aims to answer specific questions using text (as opposed to an 'aimless' exploration into the data).
+
 ```{r setup-packages, include = FALSE}
 
 knitr::opts_chunk$set(echo = FALSE,
@@ -102,7 +107,7 @@ tos <- readtext(file = "data/") %>%
 
 # Document Lengths
 
-To begin, why don't we calculate the length of each document? If you don't feel like navigating to the web pages hosting these documents yourself, this will save you some time! To calculate the length, the number of characters used in the document are counted. This includes all characters--newlines, punctuation, letters, digits, everything. While this may be considered imperfect, it gives us a 'good-enough' rough estimate for the length of each terms of use agreement.
+To begin, why don't we calculate the length of each document? If you don't feel like navigating to the web pages hosting these documents yourself, this will save you some time! To calculate the length, the number of characters used in the document are counted. This includes all characters--newlines, punctuation, letters, digits, everything. While this may be considered imperfect, it gives us a 'good-enough' estimate for the length of each terms of use agreement.
 
 Which company has the longest terms of use agreement?
 
@@ -164,6 +169,9 @@ unigram_counts <- count(unigrams, company, word, sort = FALSE)
 
 ```
 
+
+
+
 ```{r ungrouped common words}
 
 ungrouped_unigram_counts %>%  
@@ -204,3 +212,15 @@ common_words_by_company <- function(df, company_name){
 common_words_by_company(unigram_counts, "Amazon") + common_words_by_company(unigram_counts, "DuckDuckGo") + common_words_by_company(unigram_counts, "Facebook") + common_words_by_company(unigram_counts, "GitHub") + common_words_by_company(unigram_counts, "LinkedIn") + common_words_by_company(unigram_counts, "Spotify") + common_words_by_company(unigram_counts, "YouTube") + plot_annotation(title = "Most Common Words in each User Agreement")
 
 ```
+
+
+
+# TF-IDF
+
+A great way to find differences between the documents is using the TF-IDF statistic.
+
+```{r}
+
+```
+
+
