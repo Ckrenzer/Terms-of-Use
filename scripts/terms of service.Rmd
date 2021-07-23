@@ -154,6 +154,9 @@ Differences between the Snowball version and mine include:
 
 
 
+
+
+
 Second, I will be using my own n-gram tokenizer instead of the tidytext package's unnest_tokens(). Several iterations of this algorithm were tried, with each one providing notable differences in performance. Since the theme here is a DIY approach to algorithms used, I am using the custom version that provides the most flexibility [(f5() from the benchmarking done with these algorithms)](https://github.com/Ckrenzer/Terms-of-Use/blob/main/scripts/performance%20evalutation/ngram%20tokenizers.R). Implementing this step was tricky but asking [a question on StackOverflow](https://stackoverflow.com/questions/68478351/regex-to-write-your-own-ngram-tokenizer) helped to sort things out. My approach to an n-gram tokenizer bases itself on the assembly of the n-grams from unigrams. Using a tokenizer allowing for greater flexibility dampened speed harshly; more restricted versions provide speed boosts in excess of an order of magnitude over unnest_tokens().
 
 
@@ -172,8 +175,8 @@ Onto the good stuff!
 unigrams <- tos %>% 
   mutate(text = str_replace_all(text, "[,/\\\\.:;()\"]", " ")) %>% 
   ngrams(text_df = ., key_column = "company", text_column = "text", n = 1) %>% 
-  porter_stemmer(unigram_df = ., text_column = "text") %>% 
-  filter(!text %in% stop_words$word)
+  filter(!text %in% stop_words$word) %>% 
+  porter_stemmer(unigram_df = ., text_column = "text")
 
 
 ungrouped_unigram_counts <- count(unigrams, text, sort = FALSE)
@@ -186,9 +189,7 @@ unigram_counts <- count(unigrams, company, text, sort = FALSE)
 
 ```{r ungrouped common words}
 
-ungrouped_unigram_counts %>%  
-  filter(!text %in% stop_words$word,
-         text != "â") %>% 
+ungrouped_unigram_counts %>% 
   slice_max(order_by = n, n = 25) %>% 
   ggplot() +
   geom_col(mapping = aes(x = reorder(text, n), y = n, fill = text),
@@ -205,8 +206,7 @@ ungrouped_unigram_counts %>%
 common_words_by_company <- function(word_count_df, company_name){
   
   word_count_df %>% 
-    filter(!text %in% stop_words$word,
-           company == company_name) %>% 
+    filter(company == company_name) %>% 
     slice_max(order_by = n, n = 15) %>% 
     ggplot() +
     geom_col(mapping = aes(x = reorder(text, n), y = n, fill = company),
