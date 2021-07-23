@@ -159,13 +159,13 @@ Onto the good stuff!
 ```{r unigrams}
 
 unigrams <- tos %>% 
-  unnest_tokens(word, text) %>% 
-  filter(!word %in% stop_words$word) %>% 
-  porter_stemmer(unigram_df = ., text_column = "word")
+  ngrams(text_df = ., key_column = "company", text_column = "text", n = 1) %>% 
+  filter(!text %in% stop_words$word) %>% 
+  porter_stemmer(unigram_df = ., text_column = "text")
 
 
-ungrouped_unigram_counts <- count(unigrams, word, sort = FALSE)
-unigram_counts <- count(unigrams, company, word, sort = FALSE)
+ungrouped_unigram_counts <- count(unigrams, text, sort = FALSE)
+unigram_counts <- count(unigrams, company, text, sort = FALSE)
 
 ```
 
@@ -175,11 +175,11 @@ unigram_counts <- count(unigrams, company, word, sort = FALSE)
 ```{r ungrouped common words}
 
 ungrouped_unigram_counts %>%  
-  filter(!word %in% stop_words$word,
-         word != "â") %>% 
+  filter(!text %in% stop_words$word,
+         text != "â") %>% 
   slice_max(order_by = n, n = 25) %>% 
   ggplot() +
-  geom_col(mapping = aes(x = reorder(word, n), y = n, fill = word),
+  geom_col(mapping = aes(x = reorder(text, n), y = n, fill = text),
            show.legend = FALSE) +
   ggtitle("Most Common Words Among All TOS Policies") +
   xlab("Word") +
@@ -193,12 +193,12 @@ ungrouped_unigram_counts %>%
 common_words_by_company <- function(df, company_name){
   
   df %>% 
-    filter(!word %in% stop_words$word,
-           word != "â",
+    filter(!text %in% stop_words$word,
+           text != "â",
            company == company_name) %>% 
     slice_max(order_by = n, n = 15) %>% 
     ggplot() +
-    geom_col(mapping = aes(x = reorder(word, n), y = n, fill = company),
+    geom_col(mapping = aes(x = reorder(text, n), y = n, fill = company),
              show.legend = FALSE) +
     ggtitle(company_name) +
     xlab(NULL) +
