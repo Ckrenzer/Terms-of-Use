@@ -179,16 +179,17 @@ Onto the good stuff!
 ```{r unigrams}
 
 unigrams <- tos %>% 
-  mutate(text = str_replace_all(text, "[,/\\\\.:;()\"\\[&-]|\u009d", " ")) %>% 
+  mutate(text = str_replace_all(text, "[,/\\\\.:;()\"\\[\\]&]|^\\s+-\\s+|\u009d", " ")) %>% 
   ngrams(text_df = ., key_column = "company", text_column = "text", n = 1) %>% 
   filter(!text %in% stop_words$word) %>% 
   porter_stemmer(unigram_df = ., text_column = "text") %>% 
   filter(text != "",
-         !text %in% company_stems)
+         !text %in% company_stems,
+         str_length(text) > 1)
 
 ungrouped_unigram_counts <- count(unigrams, text, sort = FALSE)
 unigram_counts <- count(unigrams, company, text, sort = FALSE)
-str_remove_all("[f = &-0", "[&\\[=-]")
+
 ```
 
 
