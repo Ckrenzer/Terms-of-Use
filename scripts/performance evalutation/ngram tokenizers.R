@@ -162,8 +162,9 @@ f5 <- function(text_df, key_column = "company", text_column = "value", n = 2){
 }
 
 microbenchmark(
-  f5 = f5(text_df = df, n = 2),
   f4 = f4(),
+  
+  f5 = f5(text_df = df, n = 2),
   
   times = 10000, check = "identical"
 )
@@ -172,8 +173,8 @@ microbenchmark(
 #
 # (microseconds)
 # expr    min     lq     mean  median      uq      max neval
-#   f5 2346.2 2473.5 2833.771 2569.15 2757.40  60182.7 10000
 #   f4  969.4 1051.4 1245.736 1139.80 1216.95 263826.1 10000
+#   f5 2346.2 2473.5 2833.771 2569.15 2757.40  60182.7 10000
 
 
 # Preserving document IDs is far more expensive than dropping it,
