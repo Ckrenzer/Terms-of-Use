@@ -123,3 +123,62 @@ microbenchmark(
 # f2() 601.3  636.35  855.5795  675.45  772.50 16002.6  1000
 # f3() 496.4  525.05  683.0014  555.25  655.85  5008.8  1000
 # f4() 969.8 1086.25 1337.5965 1182.95 1310.70  5609.6  1000
+
+
+
+
+
+
+# Mock data containing a document ID field
+df <- tibble(company = c("a", "b"), value = c("words in a brief sentence", "green eggs and ham"))
+
+
+# This version is an expansion to f2() that preserves document ID
+f5 <- function(text_df, key_column = "company", text_column = "value", n = 2){
+  # making unigrams
+  words <- str_split(text_df[[text_column]], "\\s+", simplify = FALSE)
+  n <- n - 1
+  
+  # results will be added to this data frame
+  ngram_df <- tibble(company = character(0), text = character(0))
+  
+  # performing this operation for each 'key' in the data frame
+  for(element in 1:length(words)){
+    # the company name is our key
+    company_name <- text_df[[key_column]][element]
+    
+    # the n-grams are added to this vector
+    vec <- character(length(words[[element]]) - n)
+    for(i in 1:length(vec)){
+      for(j in i:(i + n)){
+        vec[i] <- str_c(vec[i], words[[element]][j], sep = " ") 
+      }
+    }
+    vec <- tibble(company = company_name, text = str_remove(vec, "^\\s{1}"))
+    ngram_df <- bind_rows(ngram_df, vec) 
+  }
+  
+  return(ngram_df)
+}
+
+microbenchmark(
+  f5 = f5(text_df = df, n = 2),
+  f4 = f4(),
+  
+  times = 10000, check = "identical"
+)
+
+# TIDYTEXT'S REDEMPTION
+#
+# (microseconds)
+# expr    min     lq     mean  median      uq      max neval
+#   f5 2346.2 2473.5 2833.771 2569.15 2757.40  60182.7 10000
+#   f4  969.4 1051.4 1245.736 1139.80 1216.95 263826.1 10000
+
+
+# Preserving document IDs is far more expensive than dropping it,
+# and tidytext's implementation is much faster than a for loop
+# equivalent when this preservation is kept.
+#
+# for loops in R are slow...who would have guessed!
+# (jk--f5() would benefit from some optimization, though)
