@@ -43,7 +43,7 @@ f1 <- function(words = df$value){
   
   tibble(text = str_c(head(words, -1), tail(words, -1), sep = " ", collapse = NULL))
 }
-f1()
+
 
 
 # My loop implementation (no one helped me put this together)
@@ -61,7 +61,7 @@ f2 <- function(words = df$value, n = 2){
   vec <- str_remove(vec, "^\\s{1}")
   return(tibble(text = vec))
 }
-f2()
+
 
 
 # Does not work for unigrams
@@ -76,7 +76,7 @@ f3 <- function(words = df$value, n = 2){
   
   tibble(text = grams)
 }
-f3()
+
 
 
 # tidytext implementation
@@ -84,7 +84,7 @@ f4 <- function(data_frame = df){
   data_frame %>% 
     unnest_tokens(input = value, output = text, token = "ngrams", n = 2, drop = TRUE)
 }
-f4()
+
 
 
 
