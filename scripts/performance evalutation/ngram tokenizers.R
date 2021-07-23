@@ -11,18 +11,25 @@ df <- tibble(value = "words in a brief sentence")
 
 
 # Fastest unigram tokenizer ----------------------------------------------
-# To get unigrams, we need to split the words up into a vector.
-# Indexing is faster than coercion:
+# To get unigrams, we need to split the words up into a vector
 microbenchmark(
-  str_split("words in a brief sentence", "\\s+")[[1]],
+  a = str_split("words in a brief sentence", "\\s+")[[1]],
   
-  unlist(str_split("words in a brief sentence", "\\s+")),
+  b = unlist(str_split("words in a brief sentence", "\\s+")),
   
-  str_split("words in a brief sentence", "\\s+") %>% unlist,
+  c = str_split("words in a brief sentence", "\\s+") %>% unlist,
   
-  times = 10000,
-  check = "identical"
+  times = 10000, check = "identical"
 )
+
+# INDEXING IS FASTER THAN COERCION
+#
+# (microseconds)
+# expr  min   lq     mean median   uq    max neval
+#    a 13.4 13.9 14.58253   14.1 14.4  101.3 10000
+#    b 14.1 14.7 15.41320   14.9 15.2   77.1 10000
+#    c 17.2 17.8 19.17496   18.1 18.5 4196.9 10000
+
 
 
 
