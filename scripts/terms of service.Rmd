@@ -152,6 +152,15 @@ Differences between the Snowball version and mine include:
 
 -   Speed. My version is about 300 times slower than the SnowballC package's implementation. This is primarily due to the copying of the data frame after each dplyr::mutate() call in my code. This difference is not very important here, since my version takes two seconds to run on this data set while Snowball takes .008 seconds. It is noticeably slower, but not enough for it to actually matter for this use-case.
 
+
+
+Second, I will be using my own n-gram tokenizer instead of the tidytext package's unnest_tokens(). Several iterations of this algorithm were tried, with each one providing notable differences in performance. Since the theme here is a DIY approach to algorithms used, I am using the custom version that provides the most flexibility [(f5() from the benchmarking done with these algorithms)](https://github.com/Ckrenzer/Terms-of-Use/blob/main/scripts/performance%20evalutation/ngram%20tokenizers.R). Implementing this step was tricky but asking [a question on StackOverflow](https://stackoverflow.com/questions/68478351/regex-to-write-your-own-ngram-tokenizer) helped to sort things out. My approach to an n-gram tokenizer bases itself on the assembly of the n-grams from unigrams. Using a tokenizer allowing for greater flexibility dampened speed harshly; more restricted versions provide speed boosts in excess of an order of magnitude over unnest_tokens().
+
+
+
+
+
+
 Doing this taught me the value of writing an algorithm yourself; rewriting and implementing an algorithm from scratch is a very effective way to learn how it works. Having the code to run the algorithm handy **and** knowing the algorithm inside and out grants unique opportunities to make improvements that better suit your needs.
 
 # Word Counts
