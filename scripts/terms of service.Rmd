@@ -179,7 +179,7 @@ Onto the good stuff!
 ```{r unigrams}
 
 unigrams <- tos %>% 
-  mutate(text = str_replace_all(text, "[,/\\\\.:;()\"]", " ")) %>% 
+  mutate(text = str_replace_all(text, "[,/\\\\.:;()\"\\[&-]|\u009d", " ")) %>% 
   ngrams(text_df = ., key_column = "company", text_column = "text", n = 1) %>% 
   filter(!text %in% stop_words$word) %>% 
   porter_stemmer(unigram_df = ., text_column = "text") %>% 
@@ -188,7 +188,7 @@ unigrams <- tos %>%
 
 ungrouped_unigram_counts <- count(unigrams, text, sort = FALSE)
 unigram_counts <- count(unigrams, company, text, sort = FALSE)
-
+str_remove_all("[f = &-0", "[&\\[=-]")
 ```
 
 
@@ -222,8 +222,10 @@ A great way to find differences between the documents is using the TF-IDF statis
 
 ```{r tfidf, fig.height = 9}
 
-tf_idf(text_df = unigram_counts, doc_id = "company", text_column = "text", counts_column = "n") %>% 
-  rank_words_by_company(word_count_df = ., company_name =  "Amazon", rank_column = "tf_idf")
+tf_idf_data <- tf_idf(text_df = unigram_counts, doc_id = "company", text_column = "text", counts_column = "n")
+
+
+rank_words_by_company(word_count_df = tf_idf_data, company_name =  "Amazon", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "DuckDuckGo", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "Facebook", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "GitHub", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "LinkedIn", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "Spotify", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "YouTube", rank_column = "tf_idf", num_to_show = 5) + plot_annotation(title = "TF-IDF For Each User Agreement", caption = "TF-IDF Statistic")
 
 ```
 

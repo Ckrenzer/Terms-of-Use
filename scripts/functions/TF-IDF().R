@@ -36,7 +36,7 @@ tf_idf <- function(text_df, doc_id = "company", text_column = "text", counts_col
     n_docs_containing_term <- unlist(n_docs_containing_term, use.names = TRUE)
     
     # a named vector containing the idf statistic
-    idf <- log(n_docs / n_docs_containing_term)
+    idf_values <- log(n_docs / n_docs_containing_term)
     
     # storing the results in a tibble
     idf_df <- tibble({{text_column}} := names(idf_values), idf = idf_values)
