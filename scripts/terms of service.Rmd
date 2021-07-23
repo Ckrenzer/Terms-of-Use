@@ -159,9 +159,10 @@ Onto the good stuff!
 ```{r unigrams}
 
 unigrams <- tos %>% 
+  mutate(text = str_replace_all(text, "[,/\\\\.:;()\"]", " ")) %>% 
   ngrams(text_df = ., key_column = "company", text_column = "text", n = 1) %>% 
-  filter(!text %in% stop_words$word) %>% 
-  porter_stemmer(unigram_df = ., text_column = "text")
+  porter_stemmer(unigram_df = ., text_column = "text") %>% 
+  filter(!text %in% stop_words$word)
 
 
 ungrouped_unigram_counts <- count(unigrams, text, sort = FALSE)
