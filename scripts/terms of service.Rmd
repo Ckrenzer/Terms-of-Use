@@ -98,10 +98,12 @@ sourceDir(path = "scripts/functions/")
 
 
 # DATA IMPORT
-tos <- readtext(file = "data/") %>% 
+tos <- readtext(file = "data/") %>%
+  as_tibble() %>% 
   rename(company = doc_id) %>% 
   mutate(company = str_remove_all(company, "_Terms_of_Service.txt"),
-         text = str_to_lower(text))
+         text = str_to_lower(text),
+         text = str_replace_all(text, "[â€œ§™“]", " "))
 
 ```
 
@@ -191,11 +193,10 @@ ungrouped_unigram_counts %>%
 
 ```{r common words by company, fig.height = 9}
 
-common_words_by_company <- function(df, company_name){
+common_words_by_company <- function(word_count_df, company_name){
   
-  df %>% 
+  word_count_df %>% 
     filter(!text %in% stop_words$word,
-           text != "â",
            company == company_name) %>% 
     slice_max(order_by = n, n = 15) %>% 
     ggplot() +
