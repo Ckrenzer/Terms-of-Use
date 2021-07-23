@@ -11,9 +11,9 @@ editor_options:
 
 The next time you go on your favorite website, scroll down to the bottom of the page and look at all the links to different sections of the company. One of these will surely be the terms of service agreement that you consent to abide by while using their platform. No one bothers reading them unless he or she plans on doing something that has the potential to bring negative repercussions.
 
-Much of the data I work with originates from web scraping. In the event you didn't know, most companies hate web scrapers for two reasons: (1) because of legitimate data privacy concerns, and (2) because companies want to sell the information that is easily acquired for free by a scraper. To put up barriers between data and people at least somewhat competent with a programming language, companies add red tape to their services in the form of a terms of use agreement. If you violate the terms of use, depending on the severity of the offense, you can get anything from suspended, banned, sued, or even criminally prosecuted. Make no mistake, there is a great deal of data out there that currently is and should continue to be off limits--public or not. It is the second case from which the bulk of my issues arise. Yes, intellectual property rights exist for good reason, but the problem for people like me, however, is that excessive red tape hinders us while seeking answers to interesting questions.
+Much of the data I work with originates from web scraping. In the event you didn't know, most companies hate web scrapers for two reasons: (1) because of legitimate data privacy concerns, and (2) because companies want to sell the information that is easily acquired for free by a scraper. To put up barriers between data and people at least somewhat competent with a programming language, companies add red tape to their services in the form of a terms of use agreement. If you violate the terms of use, depending on the severity of the offense, you can get anything from suspended, banned, sued, or even criminally prosecuted. Make no mistake, there is a great deal of data out there that currently is and should continue to be off limits--public or not. It is the second case from which the bulk of my issues arise. Yes, intellectual property rights exist for good reason, but the problem for people like me, however, is that excessive red tape hinders those seeking to answer interesting questions.
 
-The motivation for this investigation is a direct response to the anti-scraping policies so prevalent online. If the companies aren't going to allow people to scrape their data, I can at least scrape their terms of use! These documents will be used to draw conclusions about the companies more broadly.
+The motivation for this investigation is a direct response to the anti-scraping policies so prevalent online. If the companies aren't going to allow people to scrape their content, I can at least scrape their terms of use! These documents will be used to draw conclusions about the companies more broadly.
 
 ### Links to Policies
 
@@ -38,7 +38,7 @@ I couldn't find a terms of use agreement for DuckDuckGo, likely because of the l
 
 ### A Message to the Reader
 
-You may find this project reminiscent of the Fed Minutes Analysis. This study differs in several ways. Namely, several of the algorithms used here are written 'by-hand' without reliance on external libraries. Doing this has been incredibly helpful understanding the logic built into common frameworks for natural language processing and hopefully inspires the people reading this to try re-writing algorithms they use to gain a better understanding (or at least a greater appreciation!) of them. Further, the terms of use agreement is cross-sectional--we are not following the same organization across many years but instead compare different groups at one point in time. Finally--and most importantly, since we are ultimately concerned with results--Terms of Use aims to answer specific questions using text (as opposed to an 'aimless' exploration into the data).
+You may find this project reminiscent of the Fed Minutes Analysis. This study differs in several ways. Namely, several of the algorithms used here are written 'by-hand' without reliance on external libraries. Doing this has been incredibly helpful understanding the logic built into common frameworks for natural language processing and hopefully inspires the people reading this to try re-writing algorithms they use to gain a better understanding (or at least a greater appreciation!) of them. Further, the terms of use agreement is cross-sectional--we are not following the same organization across many years but are instead comparing different groups at one point in time. Finally--and most importantly, since we are ultimately concerned with results--Terms of Use aims to answer specific questions using text (as opposed to an 'aimless' exploration into the data).
 
 ```{r setup-packages, include = FALSE}
 
@@ -104,6 +104,12 @@ tos <- readtext(file = "data/") %>%
   mutate(company = str_remove_all(company, "_Terms_of_Service.txt"),
          text = str_to_lower(text),
          text = str_replace_all(text, "[â€œ§™“]", " "))
+
+# company names after stemming
+company_stems <- tos %>% 
+  transmute(company = str_to_lower(company)) %>% 
+  porter_stemmer(unigram_df = ., text_column = "company") %>% 
+  pull(company)
 
 ```
 
@@ -176,8 +182,9 @@ unigrams <- tos %>%
   mutate(text = str_replace_all(text, "[,/\\\\.:;()\"]", " ")) %>% 
   ngrams(text_df = ., key_column = "company", text_column = "text", n = 1) %>% 
   filter(!text %in% stop_words$word) %>% 
-  porter_stemmer(unigram_df = ., text_column = "text")
-
+  porter_stemmer(unigram_df = ., text_column = "text") %>% 
+  filter(text != "",
+         !text %in% company_stems)
 
 ungrouped_unigram_counts <- count(unigrams, text, sort = FALSE)
 unigram_counts <- count(unigrams, company, text, sort = FALSE)
@@ -203,24 +210,7 @@ ungrouped_unigram_counts %>%
 
 ```{r common words by company, fig.height = 9}
 
-common_words_by_company <- function(word_count_df, company_name){
-  
-  word_count_df %>% 
-    filter(company == company_name) %>% 
-    slice_max(order_by = n, n = 15) %>% 
-    ggplot() +
-    geom_col(mapping = aes(x = reorder(text, n), y = n, fill = company),
-             show.legend = FALSE) +
-    ggtitle(company_name) +
-    xlab(NULL) +
-    ylab("Number of Uses") +
-    scale_fill_manual(values = company_colors[company_name]) +
-    coord_flip() %>% 
-    return()
-  
-}
-
-common_words_by_company(unigram_counts, "Amazon") + common_words_by_company(unigram_counts, "DuckDuckGo") + common_words_by_company(unigram_counts, "Facebook") + common_words_by_company(unigram_counts, "GitHub") + common_words_by_company(unigram_counts, "LinkedIn") + common_words_by_company(unigram_counts, "Spotify") + common_words_by_company(unigram_counts, "YouTube") + plot_annotation(title = "Most Common Words in each User Agreement")
+rank_words_by_company(unigram_counts, "Amazon") + rank_words_by_company(unigram_counts, "DuckDuckGo") + rank_words_by_company(unigram_counts, "Facebook") + rank_words_by_company(unigram_counts, "GitHub") + rank_words_by_company(unigram_counts, "LinkedIn") + rank_words_by_company(unigram_counts, "Spotify") + rank_words_by_company(unigram_counts, "YouTube") + plot_annotation(title = "Most Common Words in each User Agreement", caption = "Number of uses")
 
 ```
 
@@ -230,7 +220,10 @@ common_words_by_company(unigram_counts, "Amazon") + common_words_by_company(unig
 
 A great way to find differences between the documents is using the TF-IDF statistic.
 
-```{r}
+```{r tfidf, fig.height = 9}
+
+tf_idf(text_df = unigram_counts, doc_id = "company", text_column = "text", counts_column = "n") %>% 
+  rank_words_by_company(word_count_df = ., company_name =  "Amazon", rank_column = "tf_idf")
 
 ```
 
