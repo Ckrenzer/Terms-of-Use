@@ -57,7 +57,7 @@ if(!require(pacman)) install.packages("pacman")
 pacman::p_load(readtext)
 
 # General Packages
-pacman::p_load(stringr, dplyr)
+pacman::p_load(stringr, dplyr, tidyr)
 
 # Plotting Packages
 pacman::p_load(ggplot2, patchwork)
@@ -227,6 +227,34 @@ tf_idf_data <- tf_idf(text_df = unigram_counts, doc_id = "company", text_column 
 
 
 rank_words_by_company(word_count_df = tf_idf_data, company_name =  "Amazon", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "DuckDuckGo", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "Facebook", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "GitHub", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "LinkedIn", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "Spotify", rank_column = "tf_idf", num_to_show = 5) + rank_words_by_company(word_count_df = tf_idf_data, company_name =  "YouTube", rank_column = "tf_idf", num_to_show = 5) + plot_annotation(title = "TF-IDF For Each User Agreement", caption = "TF-IDF Statistic")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Skipgrams
+
+
+```{r}
+
+skipgrams <- tos %>% 
+  mutate(text = str_replace_all(text, "[,/\\\\.:;()\"\\[\\]&]|^\\s+-\\s+|\u009d", " ")) %>% 
+  ngrams(text_df = ., key_column = "company", text_column = "text", n = 8) %>% 
+  mutate(skipgram_id = row_number()) %>% 
+  unite(col = id, sep = "_", company, skipgram_id) %>% 
+  ngrams(text_df = ., key_column = "id", text_column = "text", n = 1) %>% 
+  pair_counts(df = ., doc_id = "company", text_column = "text") %>% 
+  mutate(pairwise_prob = n / sum(n))
 
 ```
 
