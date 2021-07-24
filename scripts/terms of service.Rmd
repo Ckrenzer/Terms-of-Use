@@ -179,7 +179,7 @@ Onto the good stuff!
 ```{r unigrams}
 
 unigrams <- tos %>% 
-  mutate(text = str_replace_all(text, "[,/\\\\.:;()\"\\[\\]&]|^\\s+-\\s+|\u009d", " ")) %>% 
+  mutate(text = str_replace_all(text, "[,/\\\\.:;()\"\\[\\]&]|^\\s*-\\s*|\u009d", " ")) %>% 
   ngrams(text_df = ., key_column = "company", text_column = "text", n = 1) %>% 
   filter(!text %in% stop_words$word) %>% 
   porter_stemmer(unigram_df = ., text_column = "text") %>% 
