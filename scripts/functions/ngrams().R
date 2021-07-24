@@ -1,6 +1,6 @@
 # requires a key field--a fake one can be made in the previous call if there
 # are no key fields; this is fine for my purposes
-ngrams <- function(text_df, key_column = NULL, text_column, n = 1){
+ngrams <- function(text_df, key_column, text_column, n = 1){
   # making unigrams
   words <- str_split(text_df[[text_column]], "\\s+", simplify = FALSE)
   n <- n - 1

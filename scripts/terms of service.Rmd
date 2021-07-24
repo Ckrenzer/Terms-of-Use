@@ -245,8 +245,20 @@ rank_words_by_company(word_count_df = tf_idf_data, company_name =  "Amazon", ran
 # Skipgrams
 
 
-```{r}
+```{r skipgrams}
 
+# Calculating unigram probabilities, extracting the probabilities
+# from the data frame, and naming the vector corresponding to
+# the word the probability belongs to
+unigram_prob <- tos %>% 
+  mutate(text = str_replace_all(text, "[,/\\\\.:;()\"\\[\\]&]|^\\s+-\\s+|\u009d", " ")) %>% 
+  ngrams(text_df = ., key_column = "company", text_column = "text", n = 1) %>% 
+  count(text, sort = FALSE) %>% 
+  unigram_probabilities(df = ., doc_id = NULL) %>% 
+  dplyr::select(text, prob_item = probability)
+#unigram_prob <- structure(.Data = unigram_prob$probability, names = unigram_prob$text)
+
+# Calculating skipgram probabilities
 skipgrams <- tos %>% 
   mutate(text = str_replace_all(text, "[,/\\\\.:;()\"\\[\\]&]|^\\s+-\\s+|\u009d", " ")) %>% 
   ngrams(text_df = ., key_column = "company", text_column = "text", n = 8) %>% 
@@ -255,6 +267,22 @@ skipgrams <- tos %>%
   ngrams(text_df = ., key_column = "id", text_column = "text", n = 1) %>% 
   pair_counts(df = ., doc_id = "company", text_column = "text") %>% 
   mutate(pairwise_prob = n / sum(n))
+
+
+
+
+# Calculating normalized skipgram probability (PMI)
+pmi_matrix <- left_join(x = skipgrams, y = unigram_prob, by = c("item1" = "text")) %>% 
+  left_join(x = ., y = unigram_prob, by = c("item2" = "text")) %>% 
+  rename(prob_item1 = prob_item.x, prob_item2 = prob_item.y) %>% 
+  mutate(pmi = pairwise_prob / (prob_item1 * prob_item2)) %>% 
+  dplyr::select(item1, item2, pmi) %>% 
+  cast_sparse(data = ., row = item1, column = item2, value = pmi)
+
+# I wanted to write my own singular value decomposition function, so
+# the sparse matrix is going to be coerced to a regular matrix
+as.matrix(pmi_matrix) %>% 
+  singular_value_decomp(A = .)
 
 ```
 
