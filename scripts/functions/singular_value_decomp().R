@@ -35,7 +35,7 @@ singular_value_decomp <- function(A){
   
   # U ----------------------------------------------------------------------
   # We overwrite all data here, so no need to supply zeroes
-  U <- matrix(nrow = dimensions, ncol = dimensions)
+  U <- matrix(nrow = nrow(A), ncol = dimensions)
   for(i in 1:dimensions){
     U[, i] <- ((A %*% eig_vecs)[, i, drop = FALSE] / singular_values[i])
   }
