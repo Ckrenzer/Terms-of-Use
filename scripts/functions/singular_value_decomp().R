@@ -1,5 +1,5 @@
 # Singular Value Decomposition--requires a matrix as input
-singular_value_decomp <- function(A){
+singular_value_decomp <- function(A, singular_values_only = FALSE){
   # EIGENVALUES AND EIGENVECTORS -------------------------------------------
   # The eigenvalues and eigenvectors
   # are already in descending order--no
@@ -16,6 +16,14 @@ singular_value_decomp <- function(A){
   # SIGMA ------------------------------------------------------------------
   # the singular values
   singular_values <- sqrt(eig_vals)
+  
+  
+  # optional choice to end the function early and only return
+  # singular values
+  if(singular_values_only){
+    return(list(singular_values = singular_values)) 
+  }
+  
   
   # the dimensions of sigma
   dimensions <- length(singular_values)
