@@ -110,7 +110,7 @@ rbenchmark::benchmark(
   replications = 100
 )
 
-# siular_value_decomp() is about 3 times faster than svd()!
+# singular_value_decomp() is about 3 times faster than svd()!
 #
 #     test replications elapsed relative user.self sys.self user.child sys.child
 # 1 manual          100    7.92    1.000      6.00     1.91         NA        NA
