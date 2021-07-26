@@ -3,6 +3,7 @@
 pacman::p_load(microbenchmark, rbenchmark)
 
 
+
 # Sources scripts
 sourceDir <- function(path, trace = TRUE, ...) {
   op <- options(); on.exit(options(op)) # to reset after each 
@@ -21,48 +22,47 @@ sourceDir(path = "scripts/functions/")
 
 # The data to calculate the SVD
 my_iris <- as.matrix(iris[, -5, drop = FALSE])
-
+# Let's make the size a bit bigger...
+my_iris <- as.matrix(rep(my_iris, 15000))
 
 
 
 
 # Tests ------------------------------------------------------------------
-# One hundred thousand replications
+# One hundred replications
 microbenchmark(
   manual = singular_value_decomp(my_iris),
   
   base = svd(my_iris), 
   
-  times = 100000, unit = "ms"
+  times = 100, unit = "ms"
 )
 
-# singular_value_decomp() is about 1.6 times slower
+# singular_value_decomp() is very close to base R's speed (and has more functionality)
 #
 # (milliseconds)
-#   expr    min     lq       mean median     uq      max neval
-# manual 0.0671 0.0723 0.08780684 0.0747 0.0790 148.5569 1e+05
-#   base 0.0425 0.0458 0.05506754 0.0492 0.0517  17.7723 1e+05
+#   expr      min       lq     mean   median       uq      max neval
+# manual 200.0101 228.9913 250.6779 238.4315 249.8281 372.8541   100
+#   base 195.9959 232.2532 246.3027 237.6130 243.2878 390.8165   100
 
 
 
 
 
-# One million replications
+# One hundred replications
 rbenchmark::benchmark(
   manual = singular_value_decomp(my_iris),
   
   base = svd(my_iris), 
   
-  replications = 1000000
+  replications = 100
 )
 
-# singular_value_decomp() is still about 1.6 times slower
-# But it didn't get blown out of the water!
+# singular_value_decomp() is somewhere between 3 and 13 percent slower than svd()
 #
-# (seconds)
 #     test replications elapsed relative user.self sys.self user.child sys.child
-# 1 manual      1000000   89.97     1.61     89.74     0.07         NA        NA
-# 2   base      1000000   55.88     1.00     55.70     0.00         NA        NA
+# 1 manual          100   27.64    1.131     18.08     9.05         NA        NA
+# 2   base          100   24.44    1.000     17.47     6.92         NA        NA
 
 
 
@@ -80,21 +80,21 @@ rbenchmark::benchmark(
 # only return the singular values
 #
 #
-# One hundred thousand replications
+# One hundred replications
 microbenchmark(
   manual = singular_value_decomp(my_iris, singular_values_only = TRUE),
   
   base = svd(my_iris), 
   
-  times = 100000, unit = "ms"
+  times = 100, unit = "ms"
 )
 
-# singular_value_decomp() is now faster than svd()!
+# singular_value_decomp() is now blazing fast!
 #
-# (milliseconds)
-#   expr    min     lq       mean median     uq     max neval
-# manual 0.0374 0.0400 0.04410814 0.0410 0.0423 12.8073 1e+05
-#   base 0.0427 0.0453 0.05006944 0.0476 0.0490 12.3931 1e+05
+# Unit: milliseconds
+#   expr     min        lq      mean   median       uq      max neval
+# manual  62.743  67.96825  82.02071  70.5701  93.5641 224.0755   100
+#   base 194.614 233.38750 242.80549 240.4846 247.7697 347.0858   100
 
 
 
@@ -107,11 +107,11 @@ rbenchmark::benchmark(
   
   base = svd(my_iris), 
   
-  replications = 1000000
+  replications = 100
 )
 
-# siular_value_decomp() is about 8 percent faster than svd()!
+# siular_value_decomp() is about 3 times faster than svd()!
 #
 #     test replications elapsed relative user.self sys.self user.child sys.child
-# 1 manual      1000000   47.31    1.000     47.20        0         NA        NA
-# 2   base      1000000   51.02    1.078     50.95        0         NA        NA
+# 1 manual          100    7.92    1.000      6.00     1.91         NA        NA
+# 2   base          100   24.45    3.087     17.55     6.86         NA        NA

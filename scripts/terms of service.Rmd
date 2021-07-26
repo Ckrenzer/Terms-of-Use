@@ -66,18 +66,6 @@ pacman::p_load(ggplot2, patchwork)
 pacman::p_load(tidytext, textdata)
 
 
-
-# Julia
-pacman::p_load(JuliaCall)
-# Julia will be used here because this operation is expensive
-# julia_setup() initializes julia--make sure you have Julia installed!
-JuliaCall::julia_setup()
-# Julia Packages
-# julia_install_package_if_needed("LinearAlgebra")
-julia_library("LinearAlgebra")
-
-
-
 # Setting ggplot to the dark theme
 ggplot2::theme_set(theme_dark())
 # The colors that represent each company
@@ -297,8 +285,6 @@ pmi_matrix <- left_join(x = skipgrams, y = unigram_prob, by = c("item1" = "text"
 word_vec <- as.matrix(pmi_matrix)
 
 
-
-# (Julia code is used in this function)
 # The results of the singular value decomposition
 svd_components <- singular_value_decomp(A = word_vec, singular_values_only = FALSE)
 
