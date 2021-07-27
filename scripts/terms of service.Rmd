@@ -2,8 +2,10 @@
 title: "Terms of Service"
 author: "Connor Krenzer"
 date: "7/15/2021"
-output: html_document
-editor_options: 
+output:
+  pdf_document: default
+  html_document: default
+editor_options:
   chunk_output_type: inline
 ---
 
@@ -38,7 +40,7 @@ I couldn't find a terms of use agreement for DuckDuckGo, likely because of the l
 
 ### A Message to the Reader
 
-You may find this project reminiscent of the Fed Minutes Analysis. This study differs in several ways. Namely, several of the algorithms used here are written 'by-hand' without reliance on external libraries. Doing this has been incredibly helpful understanding the logic built into common frameworks for natural language processing and hopefully inspires the people reading this to try re-writing algorithms they use to gain a better understanding (or at least a greater appreciation!) of them. Further, the terms of use agreement is cross-sectional--we are not following the same organization across many years but are instead comparing different groups at one point in time. Finally--and most importantly, since we are ultimately concerned with results--Terms of Use aims to answer specific questions using text (as opposed to an 'aimless' exploration into the data).
+You may find this project reminiscent of the Fed Minutes Analysis. This study differs in several ways. Namely, many of the algorithms used here are written 'by-hand' without reliance on specialized external libraries. Doing this has been incredibly helpful understanding the logic built into common frameworks for natural language processing and hopefully inspires others reading this to try re-writing algorithms they use. Further, the terms of use agreement is cross-sectional--we are not following the same organization across many years but are instead looking at different groups at one point in time. The purpose of this project is to learn more about NLP algorithms, and I think it has been a great success!
 
 ```{r setup-packages, include = FALSE}
 
@@ -160,10 +162,6 @@ Differences between the Snowball version and mine include:
 -   Speed. My version is about 300 times slower than the SnowballC package's implementation. This is primarily due to the copying of the data frame after each dplyr::mutate() call in my code. This difference is not very important here, since my version takes two seconds to run on this data set while Snowball takes .008 seconds. It is noticeably slower, but not enough for it to actually matter for this use-case.
 
 
-
-
-
-
 Second, I will be using my own n-gram tokenizer instead of the tidytext package's unnest_tokens(). Several iterations of this algorithm were tried, with each one providing notable differences in performance. Since the theme here is a DIY approach to algorithms used, I am using the custom version that provides the most flexibility [(f5() from the benchmarking done with these algorithms)](https://github.com/Ckrenzer/Terms-of-Use/blob/main/scripts/performance%20evalutation/ngram%20tokenizers.R). Implementing this step was tricky but asking [a question on StackOverflow](https://stackoverflow.com/questions/68478351/regex-to-write-your-own-ngram-tokenizer) helped to sort things out. My approach to an n-gram tokenizer bases itself on the assembly of the n-grams from unigrams. Using a tokenizer allowing for greater flexibility dampened speed harshly; more restricted versions provide speed boosts in excess of an order of magnitude over unnest_tokens().
 
 
@@ -174,7 +172,7 @@ Doing this taught me the value of writing an algorithm yourself; rewriting and i
 
 # Word Counts
 
-Onto the good stuff!
+Onto the good stuff! Let's see which words are the most common:
 
 ```{r unigrams}
 
@@ -229,7 +227,7 @@ rank_words_by_company(unigram_counts, "Amazon") + rank_words_by_company(unigram_
 
 # TF-IDF
 
-A great way to find differences between the policies is by using the TF-IDF statistic.
+A spectacular way to find differences between policies is by using the TF-IDF statistic.
 
 ```{r tfidf, fig.height = 9}
 
@@ -248,7 +246,7 @@ rm(tf_idf_data, unigram_counts)
 
 
 
-
+We can see words like "item" are unique to Amazon, "privaci [privacy]" to DuckDuckGo, or "repositori [repository]" to GitHub. Features key to the services of these companies become clear using the TF-IDF.
 
 
 
@@ -260,21 +258,22 @@ rm(tf_idf_data, unigram_counts)
 
 
 
-We can compare words by measuring their similarity.
+We can also compare words by measuring their similarity via the word2vec algorithm. We calculate the word probabilities and skipgram probabilities to find the normalized skipgram probability (PMI), find the singular value decomposition of the PMI matrix, and then search for similarity between words in the 'eigen words' matrix!
 
 
 ```{r word embedding calculation}
 
-# Calculating unigram probabilities, extracting the probabilities
-# from the data frame, and naming the vector corresponding to
-# the word the probability belongs to
+# removes unwanted characters,
+# finds unigrams,
+# counts the number of occurrences of the unigrams,
+# then calculates the probability of a word occurring
 unigram_prob <- tos %>% 
   mutate(text = str_replace_all(text, "[,/\\\\.:;()\"\\[\\]&]|^\\s+-\\s+|\u009d", " ")) %>% 
   ngrams(text_df = ., key_column = "company", text_column = "text", n = 1) %>% 
   count(text, sort = FALSE) %>% 
   unigram_probabilities(df = ., doc_id = NULL) %>% 
   dplyr::select(text, prob_item = probability)
-#unigram_prob <- structure(.Data = unigram_prob$probability, names = unigram_prob$text)
+
 
 # Calculating skipgram probabilities
 skipgrams <- tos %>% 
@@ -287,8 +286,6 @@ skipgrams <- tos %>%
   mutate(pairwise_prob = n / sum(n))
 
 
-
-
 # Calculating normalized skipgram probability (PMI)
 pmi_matrix <- left_join(x = skipgrams, y = unigram_prob, by = c("item1" = "text")) %>% 
   left_join(x = ., y = unigram_prob, by = c("item2" = "text")) %>% 
@@ -299,18 +296,18 @@ pmi_matrix <- left_join(x = skipgrams, y = unigram_prob, by = c("item1" = "text"
 
 # I wanted to write my own singular value decomposition function, so
 # the sparse matrix is going to be coerced to a regular matrix
-word_vec <- as.matrix(pmi_matrix)
+pmi_matrix <- as.matrix(pmi_matrix)
 
 
 # The results of the singular value decomposition
-svd_components <- singular_value_decomp(A = word_vec, singular_values_only = FALSE)
+svd_components <- singular_value_decomp(A = pmi_matrix, singular_values_only = FALSE)
 
 # The matrix containing the 'eigen words'
 word_matrix <- svd_components$u
 
 
 # removing objects we no longer need
-rm(unigram_prob, skipgrams, pmi_matrix, word_vec, svd_components)
+rm(unigram_prob, skipgrams, pmi_matrix, svd_components)
 
 ```
 
@@ -319,7 +316,7 @@ rm(unigram_prob, skipgrams, pmi_matrix, word_vec, svd_components)
 
 
 
-Now that we have the output of the word2vec algorithm, we can do word math! Even though this was not trained on nearly a large enough dataset to be trusted, we can still ask some questions.
+How do we do this? With the output of the word2vec algorithm, we use word math! Even though word2vec was not trained with a nearly large enough dataset to be trusted, we can still ask questions.
 
 For example, what is the sum of "creepy" and "funded"?
 
