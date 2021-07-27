@@ -43,11 +43,14 @@ singular_value_decomp <- function(A, singular_values_only = FALSE){
   
   # U ----------------------------------------------------------------------
   U <- matrix(nrow = nrow(A), ncol = dimensions, data = 0.0)
-  matrix_calc = A %*% eig_vecs;
+  A_eigs = A %*% eig_vecs;
   for(i in 1:ncol(A)){
-    U[, i] <- matrix_calc[, i] / singular_values[i];
+    U[, i] <- A_eigs[, i] / singular_values[i];
   }
   
+  # providing the words for a word similarity search
+  colnames(U) <- colnames(A)
+  rownames(U) <- rownames(A)
   
   
   return(list(u = U, sigma = sigma, v_transpose = v_transpose, singular_values = singular_values))  
