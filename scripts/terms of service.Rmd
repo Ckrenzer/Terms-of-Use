@@ -1,10 +1,9 @@
 ---
-title: "Terms of Service"
+title: "Terms of Use"
 author: "Connor Krenzer"
 date: "7/15/2021"
 output:
   pdf_document: default
-  html_document: default
 editor_options:
   chunk_output_type: inline
 ---
@@ -45,7 +44,7 @@ You may find this project reminiscent of the Fed Minutes Analysis. This study di
 ```{r setup-packages, include = FALSE}
 
 knitr::opts_chunk$set(echo = FALSE,
-                      include = FALSE,
+                      include = TRUE,
                       results = "show",
                       error = FALSE,
                       warning = FALSE,

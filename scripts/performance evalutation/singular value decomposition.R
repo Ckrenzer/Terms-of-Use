@@ -38,7 +38,7 @@ microbenchmark(
   times = 100, unit = "ms"
 )
 
-# singular_value_decomp() is very close to base R's speed (and has more functionality)
+# singular_value_decomp() is very close to base R's speed
 #
 # (milliseconds)
 #   expr      min       lq     mean   median       uq      max neval
