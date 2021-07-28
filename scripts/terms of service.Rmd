@@ -10,11 +10,14 @@ editor_options:
 
 # Introduction
 
-The next time you go on your favorite website, scroll down to the bottom of the page and look at all the links to different sections of the company. One of these will surely be the terms of service agreement that you consent to abide by while using their platform. No one bothers reading them unless he or she plans on doing something that has the potential to bring negative repercussions.
+The next time you go on your favorite website, scroll down to the bottom of the page and look at all the links to different sections. One of these will surely be the terms of service agreement that you consent to abide by while using their platform. No one bothers reading them unless he or she plans on doing something that has the potential to bring negative repercussions.
 
-Much of the data I work with originates from web scraping. In the event you didn't know, most companies hate web scrapers for two reasons: (1) because of legitimate data privacy concerns, and (2) because companies want to sell the information that is easily acquired for free by a scraper. To put up barriers between data and people at least somewhat competent with a programming language, companies add red tape to their services in the form of a terms of use agreement. If you violate the terms of use, depending on the severity of the offense, you can get anything from suspended, banned, sued, or even criminally prosecuted. Make no mistake, there is a great deal of data out there that currently is and should continue to be off limits--public or not. It is the second case from which the bulk of my issues arise. Yes, intellectual property rights exist for good reason, but the problem for people like me, however, is that excessive red tape hinders those seeking to answer interesting questions.
+Much of the data I work with originates from web scraping. In the event you didn't know, most companies hate web scrapers for two reasons: (1) because of legitimate data privacy concerns, and (2) because companies want to sell the information that is easily acquired for free by a scraper. To raise barriers between data and people at least somewhat competent with a computer, companies add red tape to their services in the form of a terms of use agreement. If you violate the terms of use--depending on the severity of the offense--you can get anything from a suspension or ban from the company's services, sued, or even a criminal prosecution in very egregious cases. Make no mistake, there is a great deal of data out there that currently is and should continue to be off limits--public or not. It is the second case from which the bulk of my issues originate. Yes, intellectual property rights exist for good reason, but the problem for people like me, however, is that excessive red tape hinders those seeking to answer interesting questions with that data.
 
-The motivation for this investigation is a direct response to the anti-scraping policies so prevalent online. If the companies aren't going to allow people to scrape their content, I can at least scrape their terms of use! These documents will be used to draw conclusions about the companies more broadly.
+The motivation for this investigation stems from the anti-scraping policies so prevalent online. If the companies aren't going to allow people to scrape their content, their terms of use are still fair game! These documents will be used to test algorithms to see whether they confirm what we already know about the companies.
+
+
+
 
 ### Links to Policies
 
@@ -36,10 +39,6 @@ This section is certain to become outdated in the future, so if you want to see 
 
 I couldn't find a terms of use agreement for DuckDuckGo, likely because of the lax nature of their rules, so their privacy policy is used in place of a terms of use agreement. DuckDuckGo had to be included in this list as the 'outsider' that essentially lets you do whatever you want with the data collected from its search engine.
 
-
-### A Message to the Reader
-
-You may find this project reminiscent of the Fed Minutes Analysis. This study differs in several ways. Namely, many of the algorithms used here are written 'by-hand' without reliance on specialized external libraries. Doing this has been incredibly helpful understanding the logic built into common frameworks for natural language processing and hopefully inspires others reading this to try re-writing algorithms they use. Further, the terms of use agreement is cross-sectional--we are not following the same organization across many years but are instead looking at different groups at one point in time. The purpose of this project is to learn more about NLP algorithms, and I think it has been a great success!
 
 ```{r setup-packages, include = FALSE}
 
@@ -144,9 +143,7 @@ Unsurprisingly, DuckDuckGo has the shortest policy. Does this mean that refusing
 
 # Data Prep
 
-Before doing further work with these documents, they will need some pre-processing.
-
-I will be using the Porter stemming algorithm to pre-process the text. While in an industrious mood, I decided to implement the algorithm myself using [this article](https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/) and the [algorithm's official web page](https://tartarus.org/martin/PorterStemmer/index.html) as guides. After many hours tweaking the algorithm's intricacies, my implementation returns the same result as the official implementation in the [SnowballC package](https://CRAN.R-project.org/package=SnowballC) 98% of the time when using this dataset.
+The Porter stemming algorithm will be used to pre-process the text. While in an industrious mood, I decided to implement the algorithm myself using [this article](https://vijinimallawaarachchi.com/2017/05/09/porter-stemming-algorithm/) and the [algorithm's official web page](https://tartarus.org/martin/PorterStemmer/index.html) as guides. After many hours tweaking the algorithm's intricacies, my implementation returns the same result as the official implementation in the [SnowballC package](https://CRAN.R-project.org/package=SnowballC) 98% of the time when using this dataset.
 
 Differences between the Snowball version and mine include:
 
@@ -161,10 +158,10 @@ Differences between the Snowball version and mine include:
 -   Speed. My version is about 300 times slower than the SnowballC package's implementation. This is primarily due to the copying of the data frame after each dplyr::mutate() call in my code. This difference is not very important here, since my version takes two seconds to run on this data set while Snowball takes .008 seconds. It is noticeably slower, but not enough for it to actually matter for this use-case.
 
 
-Second, I will be using my own n-gram tokenizer instead of the tidytext package's unnest_tokens(). Several iterations of this algorithm were tried, with each one providing notable differences in performance. Since the theme here is a DIY approach to algorithms used, I am using the custom version that provides the most flexibility [(f5() from the benchmarking done with these algorithms)](https://github.com/Ckrenzer/Terms-of-Use/blob/main/scripts/performance%20evalutation/ngram%20tokenizers.R). Implementing this step was tricky but asking [a question on StackOverflow](https://stackoverflow.com/questions/68478351/regex-to-write-your-own-ngram-tokenizer) helped to sort things out. My approach to an n-gram tokenizer bases itself on the assembly of the n-grams from unigrams. Using a tokenizer allowing for greater flexibility dampened speed harshly; more restricted versions provide speed boosts in excess of an order of magnitude over unnest_tokens().
+Second, I will be using my own n-gram tokenizer instead of the tidytext package's unnest_tokens(). Several iterations of this algorithm were tried, with each one providing notable differences in performance. Since the theme here is a DIY approach to algorithms, I am using the custom version that provides the most flexibility [(f5() from the benchmarking done with these algorithms)](https://github.com/Ckrenzer/Terms-of-Use/blob/main/scripts/performance%20evalutation/ngram%20tokenizers.R). Implementing this step was tricky but asking [a question on StackOverflow](https://stackoverflow.com/questions/68478351/regex-to-write-your-own-ngram-tokenizer) helped to sort things out. My approach to an n-gram tokenizer bases itself on the assembly of the n-grams from unigrams. Using a tokenizer that allows greater flexibility dampened speed harshly; more restricted versions provide speed boosts in excess of an order of magnitude over unnest_tokens().
 
 
-Other algorithms written 'by-hand' include a pairwise counting function, the TF-IDF statistic, and word2vec (word embeddings). These do not have significant enough differences in end results to provide a play-by-play.
+Other algorithms written 'by-hand' include a pairwise counting function (which was important for calculating skipgram probabilities), the TF-IDF statistic, and word2vec (word embeddings). These do not have significant enough differences in end results to provide a play-by-play.
 
 
 Doing this taught me the value of writing an algorithm yourself; rewriting and implementing an algorithm from scratch is a very effective way to learn how it works. Having the code to run the algorithm handy **and** knowing the algorithm inside and out grants unique opportunities to make improvements that better suit your needs.
@@ -245,7 +242,7 @@ rm(tf_idf_data, unigram_counts)
 
 
 
-We can see words like "item" are unique to Amazon, "privaci [privacy]" to DuckDuckGo, or "repositori [repository]" to GitHub. Features key to the services of these companies become clear using the TF-IDF.
+We can see words like "item" are unique to Amazon, "privaci [privacy]" to DuckDuckGo, or "repositori [repository]" to GitHub. Features key to the services of these companies become clear after using the TF-IDF.
 
 
 
@@ -315,7 +312,7 @@ rm(unigram_prob, skipgrams, pmi_matrix, svd_components)
 
 
 
-How do we do this? With the output of the word2vec algorithm, we use word math! Even though word2vec was not trained with a nearly large enough dataset to be trusted, we can still ask questions.
+How do we do this? Word Math! Even though word2vec was not trained with a nearly large enough dataset to be trusted, we can still ask questions.
 
 For example, what is the sum of "creepy" and "funded"?
 
@@ -326,4 +323,4 @@ cat(names(sort(word_matrix["creepy", ] + word_matrix["funded", ], decreasing = T
 
 ```
 
-Sounds about right.
+Yep.

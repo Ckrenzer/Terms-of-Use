@@ -3,7 +3,7 @@ This project started as an exploration into the terms of service agreement emplo
 
 # Output
 
-You can see the output [here](https://github.com/Ckrenzer/Terms-of-Use/blob/main/terms-of-service.pdf).
+You can see the output [here](https://github.com/Ckrenzer/Terms-of-Use/blob/main/terms-of-service.pdf). Note that the links will only work if you download the PDF.
 
 ### Algorithms Written 'By-Hand'
 
